@@ -1,10 +1,11 @@
+const cspmiddleware=require('./src/middleware/cspmiddleware')
+const csrfmiddleware=require('./src/middleware/csrfmiddleware')
+const errorHandler = require('./src/middleware/errorHandler');
+const routes = require('./src/routes/userRoutes'); 
 const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const helmet = require('helmet');
-const { errorHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
+
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -12,6 +13,7 @@ app.use(morgan('dev')); // Logging
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
+app.use(csrfmiddleware);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -34,5 +36,6 @@ app.use((req, res, next) => {
 });
 
 app.use(errorHandler);
+app.use('/api', routes);
 
 module.exports = app;
