@@ -4,7 +4,7 @@ const invoices = [
     invoiceId: "INV001",
     userId: "USR001",
     parkingSpotId: "PS001",
-    vehicleType: "car",
+    vehicleType: "4W",
     checkInTime: "2025-10-15T10:00:00Z",
     checkOutTime: "2025-10-15T12:00:00Z",
     amount: 100,
@@ -16,7 +16,7 @@ const invoices = [
     invoiceId: "INV002",
     userId: "USR002",
     parkingSpotId: "PS002",
-    vehicleType: "bike",
+    vehicleType: "2W",
     checkInTime: "2025-10-15T09:00:00Z",
     checkOutTime: "2025-10-15T11:30:00Z",
     amount: 75,
@@ -28,17 +28,13 @@ const invoices = [
 
 // Rate card for different vehicle types (per hour)
 const rateCard = {
-  car: {
-    baseRate: 50,
-    additionalHourRate: 30
+  "4W": {
+    baseRate: 60,    // Base rate for four-wheelers (first hour)
+    additionalHourRate: 40  // Rate for each additional hour
   },
-  bike: {
-    baseRate: 30,
-    additionalHourRate: 20
-  },
-  truck: {
-    baseRate: 80,
-    additionalHourRate: 50
+  "2W": {
+    baseRate: 30,    // Base rate for two-wheelers (first hour)
+    additionalHourRate: 20  // Rate for each additional hour
   }
 };
 
