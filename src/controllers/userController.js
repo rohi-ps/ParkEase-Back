@@ -1,3 +1,28 @@
+const jwt = require('jsonwebtoken');
+const users = []; // In-memory for demo
+
+exports.register = (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 8) {
+    return res.status(400).json({ message: 'Invalid input' });
+  }
+
+  const exists = users.find(u => u.username === username);
+  if (exists) return res.status(409).json({ message: 'User already exists' });
+
+  users.push({ username, password });
+  res.status(201).json({ message: 'User registered successfully' });
+};
+
+exports.login = (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username && u.password === password);
+
+  if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+  const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  res.status(200).json({ message: 'Login successful', token });
+};
 const fs = require('fs');
 const path = require('path');
 
@@ -124,98 +149,3 @@ exports.allusers = (req, res) => {
   res.status(200).json(slots);
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const users=[];
-// exports.createReservation=(req,res)=>{
-//   const {slotID,VehicleType,vehicleNumber,EntryDate,EntryTime,ExitDate,ExitTime}=req.body;
-//   if(!slotID|| !VehicleType|| !vehicleNumber|| !EntryDate|| !EntryTime|| !ExitDate|| !ExitTime){
-//     return res.status(400).json({message:"Invalid Inputs"})
-//   }
-//   users.push({slotID,VehicleType,vehicleNumber,EntryDate,EntryTime,ExitDate,ExitTime});
-//   res.status(200).json({message:"Slot created Successfully"})
-// }
-
-// exports.updateReservation=(req,res)=>{
-//   const {slotID,VehicleType,vehicleNumber,EntryDate,EntryTime,ExitDate,ExitTime}=req.body;
-//   if(!slotID|| !VehicleType|| !vehicleNumber|| !EntryDate|| !EntryTime|| !ExitDate|| !ExitTime){
-//     return res.status(400).json({message:"Invalid Inputs"})
-//   }
-//   const index = users.findIndex(slot => slot.slotID === slotID);
-//   if (index === -1) {
-//     return res.status(404).json({ message: "Slot not found" });
-//   }
-
-//   users[index] = { slotID, VehicleType, vehicleNumber, EntryDate, EntryTime, ExitDate, ExitTime };
-//   res.status(200).json({ message: "Slot updated successfully" },users);
-// }
-
-// exports.deleteReservation=(req,res)=>{
-
-//   const { slotID } = req.params;
-//   const index = users.findIndex(slot => slot.slotID === slotID);
-//   if (index === -1) {
-//     return res.status(404).json({ message: "Slot not found" });
-//   }
-
-//   users.splice(index, 1);
-//   res.status(200).json({ message: "Slot deleted successfully" });
-// }
-// exports.allusers=(req,res)=>{
-//   res.status(200).json({users})
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// {
-//   "slotID": "A1",
-//   "VehicleType": "2W",
-//   "vehicleNumber": "TN01AB1234",
-//   "EntryDate": "2025-10-16",
-//   "EntryTime": "11:00",
-//   "ExitDate": "2025-10-16",
-//   "ExitTime": "13:00"
-// }
-
-
-// {
-//   "slotID": "A1",
-//   "VehicleType": "2W",
-//   "vehicleNumber": "TN01AB9999",  
-//   "EntryDate": "2025-10-16",
-//   "EntryTime": "12:00",           
-//   "ExitDate": "2025-10-16",
-//   "ExitTime": "14:00"            
-// }
