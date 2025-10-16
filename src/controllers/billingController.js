@@ -1,4 +1,4 @@
-const { invoices, paymentMethods } = require('../data/billingData');
+const { invoices, paymentMethods, rateCard } = require('../data/billingData');
 const { calculateParkingCharges, generateInvoiceId } = require('../utils/billingUtils');
 
 // Get all invoices
@@ -48,6 +48,14 @@ const generateInvoice = (req, res) => {
       return res.status(400).json({
         status: 'fail',
         message: 'Missing required fields'
+      });
+    }
+
+    // Validate vehicle type
+    if (!["2W", "4W"].includes(vehicleType)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid vehicle type. Must be either "2W" or "4W"'
       });
     }
 

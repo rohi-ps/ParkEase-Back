@@ -21,6 +21,6 @@ router.post('/invoices', generateInvoice);
 router.post('/invoices/:id/payment', processPayment);
 
 // Get available payment methods
-router.get('/payment-methods', getPaymentMethods);
+// router.get('/payment-methods', getPaymentMethods);
 
 module.exports = router;
