@@ -47,7 +47,6 @@ const updateParkingSpotStatus = (req, res) => {
         message: 'Parking spot not found'
       });
     }
-
     parkingSpots[spotIndex] = {
       ...parkingSpots[spotIndex],
       isOccupied: req.body.isOccupied
@@ -65,8 +64,32 @@ const updateParkingSpotStatus = (req, res) => {
   }
 };
 
+const deleteParkingSpot = (req, res) => {
+  try {
+    const spotIndex = parkingSpots.findIndex(spot => spot.id === req.params.id);
+    if (spotIndex === -1) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Parking spot not found'
+      });
+    }
+    parkingSpots.splice(spotIndex, 1);
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',  
+      message: 'Error deleting parking spot'
+    });
+  } 
+};
+
+
 module.exports = {
   getAllParkingSpots,
   getParkingSpotById,
-  updateParkingSpotStatus
+  updateParkingSpotStatus,
+  deleteParkingSpot
 };
