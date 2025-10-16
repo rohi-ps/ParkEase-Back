@@ -20,9 +20,11 @@ app.get('/health', (req, res) => {
 
 // Import routes
 const parkingRoutes = require('./src/routes/parkingRoutes');
+const billingRoutes = require('./src/routes/billingRoutes');
 
 // Routes
 app.use('/api/v1/parking-spots', parkingRoutes);
+app.use('/api/v1/billing', billingRoutes);
 
 // Error handling
 app.use((req, res, next) => {
