@@ -19,4 +19,4 @@ module.exports = connectDatabase;
 */
 
 // Placeholder for future database connection
-module.exports = () => console.log('Using in-memory data storage');
+// module.exports = () => console.log('Using in-memory data storage');
