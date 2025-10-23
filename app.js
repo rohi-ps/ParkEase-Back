@@ -1,6 +1,5 @@
 const csrfmiddleware=require('./src/middleware/csrfmiddleware')
 const errorHandler = require('./src/middleware/errorHandler');
-const routes = require('./src/routes/userRoutes'); 
 const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -19,14 +18,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// Import routes
+// Import routes  
+const routes = require('./src/routes/userRoutes'); 
 const parkingRoutes = require('./src/routes/parkingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
+// const reservationRoutes = require('./src/routes/reservationRoutes');
 
 // Routes
 app.use('/api', routes);
 app.use('/api/v1/parking-spots', parkingRoutes);
 app.use('/api/v1/billing', billingRoutes);
+// app.use('/api/v1/reservations', reservationRoutes);
 
 // Error handling
 app.use((req, res, next) => {

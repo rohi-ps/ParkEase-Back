@@ -26,4 +26,8 @@ router.get('/admin', verifyToken, requireRole('admin'), (req, res) => {
   res.json({ message: `Welcome Admin ${req.user.username}` });
 });
 
+
+
 module.exports = router;
+
+
