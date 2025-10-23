@@ -1,12 +1,11 @@
-const cspmiddleware=require('./src/middleware/cspmiddleware')
 const csrfmiddleware=require('./src/middleware/csrfmiddleware')
 const errorHandler = require('./src/middleware/errorHandler');
 const routes = require('./src/routes/userRoutes'); 
 const express = require('express');
-
+const helmet = require('helmet');
+const morgan = require('morgan');
+const cors=require('cors');
 const app = express();
-
-
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
@@ -25,6 +24,7 @@ const parkingRoutes = require('./src/routes/parkingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
 
 // Routes
+app.use('/api', routes);
 app.use('/api/v1/parking-spots', parkingRoutes);
 app.use('/api/v1/billing', billingRoutes);
 
@@ -34,8 +34,8 @@ app.use((req, res, next) => {
   error.status = 404;
   next(error);
 });
-
 app.use(errorHandler);
-app.use('/api', routes);
+
+
 
 module.exports = app;
