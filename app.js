@@ -11,7 +11,7 @@ app.use(morgan('dev')); // Logging
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
-app.use(csrfmiddleware);
+
  
 // Health check route
 app.get('/health', (req, res) => {
@@ -28,14 +28,11 @@ const reservationRoutes = require('./src/routes/reservationRoutes');
 app.use('/api', routes);
 app.use('/api/v1/parking-spots', parkingRoutes);
 app.use('/api/v1/billing', billingRoutes);
-app.use('/api/v1/reservations', reservationRoutes);
+app.use('/api/reservation', reservationRoutes);
 
-// Error handling
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
-});
+
+
+app.use(csrfmiddleware);
 app.use(errorHandler);
 
 
