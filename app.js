@@ -12,12 +12,12 @@ app.use(cors()); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(csrfmiddleware);
-
+ 
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
-
+ 
 // Import routes  
 const routes = require('./src/routes/userRoutes'); 
 const parkingRoutes = require('./src/routes/parkingRoutes');
@@ -41,3 +41,4 @@ app.use(errorHandler);
 
 
 module.exports = app;
+ 
