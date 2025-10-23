@@ -1,32 +1,23 @@
-// // Sample parking spots data
-// const parkingSpots = [
-//   {
-//     id: "PS001",
-//     spotNumber: "A1",
-//     isOccupied: false,
-//     vehicleType: "car",
-//     floor: 1,
-//     section: "A",
-//     rate: 50
-//   },
-//   {
-//     id: "PS002",
-//     spotNumber: "A2",
-//     isOccupied: true,
-//     vehicleType: "car",
-//     floor: 1,
-//     section: "A",
-//     rate: 50
-//   },
-//   {
-//     id: "PS003",
-//     spotNumber: "B1",
-//     isOccupied: false,
-//     vehicleType: "bike",
-//     floor: 1,
-//     section: "B",
-//     rate: 30
-//   }
-// ];
-
-// module.exports = parkingSpots;
+const parkingLogs= [
+  {
+        id: 1,
+        vehicleNumber: "MH14CD5678",
+        customerName: "Devraj Patil",
+        vehicleType: "2W",
+        slotId: "B-02",
+        entryTime: new Date(Date.now() - 3600000 * 2), // 2 hours ago
+        exitTime: new Date(Date.now() - 3600000), // 1 hour ago
+        status: "Completed"
+    },
+    {
+        id: 2,
+        vehicleNumber: "MH09EF9101",
+        customerName: "Jagannath Kar",
+        slotId: "C-03",
+        entryTime: new Date(Date.now() - 1800000), // 30 minutes ago
+        exitTime: null,
+        status: "Parked"
+    }
+];
+//push
+module.exports=parkingLogs;
