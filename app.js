@@ -1,4 +1,4 @@
-const csrfmiddleware=require('./src/middleware/csrfmiddleware')
+// const csrfmiddleware=require('./src/middleware/csrfmiddleware')
 const errorHandler = require('./src/middleware/errorHandler');
 const express = require('express');
 const helmet = require('helmet');
@@ -11,8 +11,8 @@ app.use(morgan('dev')); // Logging
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
-app.use(csrfmiddleware);
- 
+// app.use(csrfmiddleware);
+
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
