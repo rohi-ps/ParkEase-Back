@@ -6,32 +6,47 @@ const jwt = require('jsonwebtoken');
 const usersFile = path.join(__dirname, '../data/users.json');
 const readUsers = () => {
   if (!fs.existsSync(usersFile)) return [];
-  const data = fs.readFileSync(usersFile);
-  return JSON.parse(data);
+
+  const data = fs.readFileSync(usersFile, 'utf-8');
+  try {
+    return JSON.parse(data || '[]'); 
+  } catch (err) {
+    console.error('Failed to parse users.json:', err.message);
+    return []; 
+  }
 };
+
 const writeUsers = (users) => {
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
 };
 
-exports.register = (req, res) => {
-  const { email, firstname,lastname,password,confirmpassword } = req.body;
-  // if (!username || !password || password.length < 8) {
-  //   return res.status(400).json({ message: 'Invalid input' });
-  // }
+exports.register = async (req, res) => {
+  try {
+    const { email, firstname, lastname, password, confirmPassword } = req.body;
+    const users = readUsers();
+    const exists = users.find(u => u.email === email);
+    if (exists) return res.status(409).json({ message: 'User already exists' });
 
-  const users = readUsers();
-  const exists = users.find(u => u.email === email && u.password===password && u.confirmpassword===confirmpassword);
-  if (exists) return res.status(409).json({ message: 'User already exists' });
+    const newUser = { email, firstname, lastname, password, confirmPassword, role: 'user' };
+    users.push(newUser);
+    writeUsers(users);
 
-  const newUser = { email,firstname,lastname, password,confirmpassword, role: 'user' };
-  users.push(newUser);
-  writeUsers(users);
-try {
-    sendWelcomeEmail(email,password);
-    res.status(201).json({ message: 'User registered and email sent successfully' });
+    try {
+      const info = await sendWelcomeEmail(email, firstname);
+      if (info.accepted.includes(email)) {
+        return res.status(201).json({ message: 'User registered and email sent successfully' });
+      } else {
+        return res.status(201).json({ message: 'User registered, but email was rejected' });
+      }
+    } catch (emailErr) {
+      console.error('Email error:', emailErr);
+      return res.status(201).json({ message: 'User registered, but email failed to send' });
+    }
   } catch (err) {
-    console.error('Email error:', err);
-    res.status(201).json({ message: 'User registered, but email failed to send' });
+    console.error('Register error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 

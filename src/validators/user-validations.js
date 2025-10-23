@@ -12,20 +12,23 @@ exports.registerValidators = [
 
   body('firstname')
     .trim()
-    .notEmpty().withMessage('Username is required')
+    .notEmpty().withMessage('Firstname is required')
     .isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
   body('lastname')
     .trim()
-    .notEmpty().withMessage('Username is required')
+    .notEmpty().withMessage('Lastname is required')
     .isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
 
- body('password').custom(isStrongPassword),
+  body('password').custom(isStrongPassword),
   body('confirmPassword').custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error('Passwords do not match');
-    }
-    return true;
-  })
+  const password = req.body.password;
+  const confirm = req.body.confirmPassword || req.body.confirmpassword;
+  if (confirm !== password) {
+    throw new Error('Passwords do not match');
+  }
+  return true;
+})
+
   
 ];
 exports.loginValidators = [

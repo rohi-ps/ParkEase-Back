@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createReservation ,updateReservation, deleteReservation,allusers} = require('../controllers/userController');
+const { createReservation ,updateReservation, deleteReservation,allusers} = require('../controllers/reservationController');
 
 
 router.delete('/delete/:slotID', deleteReservation);

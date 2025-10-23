@@ -5,13 +5,14 @@ const { register, login } = require('../controllers/userController');
 const {validationResult}  = require('express-validator');
 const { verifyToken,requireRole } = require('../middleware/jwt');
 const {registerValidators,loginValidators}=require('../validators/user-validations')
-router.post('/register', registerValidators,(req, res) => {
+router.post('/register', registerValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  register(req,res);
+  await register(req, res);
 });
+
 router.post('/login', loginValidators,(req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
