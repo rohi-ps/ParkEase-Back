@@ -18,7 +18,8 @@ const getAllParkingSpots = (req, res) => {
 // Get parking spot by ID
 const getParkingSpotById = (req, res) => {
   try {
-    const spot = parkingSpots.find(spot => spot.id === req.params.id);
+    const spotId = req.params.id;
+    const spot = parkingSpots.find(spot => spot.id === spotId);
     if (!spot) {
       return res.status(404).json({
         status: 'fail',
@@ -40,7 +41,8 @@ const getParkingSpotById = (req, res) => {
 // Update parking spot status
 const updateParkingSpotStatus = (req, res) => {
   try {
-    const spotIndex = parkingSpots.findIndex(spot => spot.id === req.params.id);
+    const spotId = req.params.id;
+    const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
       return res.status(404).json({
         status: 'fail',
@@ -49,7 +51,7 @@ const updateParkingSpotStatus = (req, res) => {
     }
     parkingSpots[spotIndex] = {
       ...parkingSpots[spotIndex],
-      isOccupied: req.body.isOccupied
+      status: req.body.status || parkingSpots[spotIndex].status
     };
 
     res.status(200).json({
@@ -66,7 +68,8 @@ const updateParkingSpotStatus = (req, res) => {
 
 const deleteParkingSpot = (req, res) => {
   try {
-    const spotIndex = parkingSpots.findIndex(spot => spot.id === req.params.id);
+    const spotId = req.params.id;
+    const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
       return res.status(404).json({
         status: 'fail',

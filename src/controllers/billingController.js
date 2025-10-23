@@ -1,12 +1,12 @@
-const { invoices, paymentMethods, rateCard } = require('../data/billingData');
-const { calculateParkingCharges, generateInvoiceId } = require('../utils/billingUtils');
+const { readJsonFile, writeJsonFile, calculateParkingCharges, generateInvoiceId } = require('../utils/billingUtils');
 
 // Get all invoices
-const getAllInvoices = (req, res) => {
+const getAllInvoices = async (req, res) => {
   try {
+    const data = await readJsonFile();
     res.status(200).json({
       status: 'success',
-      data: invoices
+      data: data.invoices
     });
   } catch (error) {
     res.status(500).json({
@@ -17,9 +17,10 @@ const getAllInvoices = (req, res) => {
 };
 
 // Get invoice by ID
-const getInvoiceById = (req, res) => {
+const getInvoiceById = async (req, res) => {
   try {
-    const invoice = invoices.find(inv => inv.invoiceId === req.params.id);
+    const data = await readJsonFile();
+    const invoice = data.invoices.find(inv => inv.invoiceId === req.params.id);
     if (!invoice) {
       return res.status(404).json({
         status: 'fail',
@@ -39,7 +40,7 @@ const getInvoiceById = (req, res) => {
 };
 
 // Generate new invoice
-const generateInvoice = (req, res) => {
+const generateInvoice = async (req, res) => {
   try {
     const { userId, parkingSpotId, vehicleType, checkInTime, checkOutTime } = req.body;
 
@@ -60,7 +61,7 @@ const generateInvoice = (req, res) => {
     }
 
     // Calculate charges
-    const charges = calculateParkingCharges(vehicleType, checkInTime, checkOutTime);
+    const charges = await calculateParkingCharges(vehicleType, checkInTime, checkOutTime);
 
     // Create new invoice
     const newInvoice = {
@@ -82,7 +83,14 @@ const generateInvoice = (req, res) => {
       }
     };
 
-    invoices.push(newInvoice);
+    // Read current data
+    const data = await readJsonFile();
+    
+    // Add new invoice
+    data.invoices.push(newInvoice);
+    
+    // Write updated data back to file
+    await writeJsonFile(data);
 
     res.status(201).json({
       status: 'success',
@@ -97,12 +105,15 @@ const generateInvoice = (req, res) => {
 };
 
 // Process payment for an invoice
-const processPayment = (req, res) => {
+const processPayment = async (req, res) => {
   try {
     const { paymentMethod } = req.body;
     const invoiceId = req.params.id;
 
-    if (!paymentMethod || !paymentMethods.includes(paymentMethod)) {
+    // Read current data
+    const data = await readJsonFile();
+
+    if (!paymentMethod || !data.paymentMethods.includes(paymentMethod)) {
       return res.status(400).json({
         status: 'fail',
         message: 'Invalid payment method'
@@ -110,7 +121,7 @@ const processPayment = (req, res) => {
     }
 
     // Find invoice
-    const invoiceIndex = invoices.findIndex(inv => inv.invoiceId === invoiceId);
+    const invoiceIndex = data.invoices.findIndex(inv => inv.invoiceId === invoiceId);
     if (invoiceIndex === -1) {
       return res.status(404).json({
         status: 'fail',
@@ -118,16 +129,20 @@ const processPayment = (req, res) => {
       });
     }
 
-    invoices[invoiceIndex] = {
-      ...invoices[invoiceIndex],
+    // Update invoice
+    data.invoices[invoiceIndex] = {
+      ...data.invoices[invoiceIndex],
       paymentMethod,
       status: 'paid',
       paidAt: new Date().toISOString()
     };
 
+    // Write updated data back to file
+    await writeJsonFile(data);
+
     res.status(200).json({
       status: 'success',
-      data: invoices[invoiceIndex]
+      data: data.invoices[invoiceIndex]
     });
   } catch (error) {
     res.status(500).json({
@@ -138,11 +153,12 @@ const processPayment = (req, res) => {
 };
 
 // Get available payment methods
-const getPaymentMethods = (req, res) => {
+const getPaymentMethods = async (req, res) => {
   try {
+    const data = await readJsonFile();
     res.status(200).json({
       status: 'success',
-      data: paymentMethods
+      data: data.paymentMethods
     });
   } catch (error) {
     res.status(500).json({
