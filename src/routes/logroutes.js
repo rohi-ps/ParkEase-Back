@@ -1,6 +1,6 @@
 const { protectRoute } = require('../middleware/authMiddleware.js');
 const express = require('express');
-const { getAllLogs,createLog,getLogById,exitVehicle } = require('../controllers/logController.js');
+const { getAllLogs,createLog,getLogById,exitVehicle } = require('../controllers/logcontroller.js');
 
 const router = express.Router();
 
