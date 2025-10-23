@@ -8,13 +8,24 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-exports.sendWelcomeEmail = (to, username) => {
+exports.sendWelcomeEmail = async (to, username) => {
   const mailOptions = {
     from: process.env.MAIL_USER,
-    to,
+    to:"vuddangidurgaprasad@gmail.com",
     subject: 'Welcome to ParkEase!',
     text: `Hi ${username},\n\nThanks for registering with ParkEase. We're glad to have you!`
   };
 
-  return transporter.sendMail(mailOptions);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    console.log('Accepted:', info.accepted);
+    console.log('Rejected:', info.rejected);
+    return info;
+  } catch (err) {
+    console.error('sendMail failed:', JSON.stringify(err, null, 2));
+    throw err;
+  }
 };
+
+
