@@ -66,3 +66,4 @@ const exitVehicle = (req, res) => {
 
 module.exports={createLog,getAllLogs,getLogById,exitVehicle};
 
+//push
