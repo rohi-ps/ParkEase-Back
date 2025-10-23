@@ -1,24 +1,31 @@
-const { protectRoute } = require('../middleware/authMiddleware.js');
 const express = require('express');
-const { getAllLogs,createLog,getLogById,exitVehicle } = require('../controllers/logcontroller.js');
+const { 
+    getAllLogs,
+    createLog,
+    getLogById,
+    exitVehicle 
+} = require('../controllers/logController.js'); 
+
+const { verifyToken, requireRole } = require('../middleware/jwt.js'); 
 
 const router = express.Router();
 
-// This middleware will be applied to all routes in this file,
-// simulating that a user must be authenticated.
-router.use(protectRoute);
+router.use(verifyToken);
 
-// Route to get all logs and create a new one
+// --- Admin-Only Routes ---
+// GET all logs and POST a new log are restricted to 'admin'.
 router.route('/')
-    .get(getAllLogs)
-    .post(createLog);
+    .get(requireRole('admin'), getAllLogs)   
+    .post(requireRole('admin'), createLog);  
 
-// Route to get a single log by its ID
+// --- Route Accessible by Authenticated Users (Admin OR User) ---
+// GET a single log by its ID
 router.route('/:id')
-    .get(getLogById);
+    .get(getLogById); 
 
-// Route to mark a vehicle as exited
+// --- Admin-Only Action Route ---
 router.route('/:id/exit')
-    .patch(exitVehicle);
+    .patch(requireRole('admin'), exitVehicle); 
 
-module.exports=router;
+module.exports = router;
+
