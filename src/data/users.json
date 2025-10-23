@@ -86,5 +86,13 @@
     "password": "Chikki@18",
     "confirmPassword": "Chikki@18",
     "role": "user"
+  },
+  {
+    "email": "devraj@gmail.com",
+    "firstname": "Devraj",
+    "lastname": "Patil",
+    "password": "Devraj@12",
+    "confirmPassword": "Devraj@12",
+    "role": "user"
   }
 ]

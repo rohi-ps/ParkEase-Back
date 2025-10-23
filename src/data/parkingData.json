@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "vehicleNumber": "MH14CD5678",
+    "customerName": "Devraj Patil",
+    "vehicleType": "2W",
+    "slotId": "B-02",
+    "entryTime": "2025-10-23T08:00:00.000Z",
+    "exitTime": "2025-10-23T09:00:00.000Z",
+    "status": "Completed"
+  },
+  {
+    "id": 2,
+    "vehicleNumber": "MH09EF9101",
+    "customerName": "Rohit Sudarshan",
+    "vehicleType": "4W",
+    "slotId": "C-03",
+    "entryTime": "2025-10-23T11:30:00.000Z",
+    "exitTime": null,
+    "status": "Parked"
+  }
+]
