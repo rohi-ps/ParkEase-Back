@@ -15,6 +15,32 @@ const getAllParkingSpots = (req, res) => {
   }
 };
 
+// Add new parking spot
+const addParkingSpot = (req, res) => {
+  try {
+    const newSpot = {
+      id: parkingSpots.length + 1,
+      vehicleNumber: req.body.vehicleNumber,
+      customerName: req.body.customerName,
+      vehicleType: req.body.vehicleType,
+      slotId: req.body.slotId,
+      entryTime: new Date(), // 2 hours ago
+      exitTime: null,
+      status: req.body.status || 'available'
+    };
+    parkingSpots.push(newSpot);
+    res.status(201).json({
+      status: 'success',
+      data: newSpot
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Error adding parking spot'
+    });
+  }
+};
+
 // Get parking spot by ID
 const getParkingSpotById = (req, res) => {
   try {
@@ -92,6 +118,7 @@ const deleteParkingSpot = (req, res) => {
 
 module.exports = {
   getAllParkingSpots,
+  addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
   deleteParkingSpot
