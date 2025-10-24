@@ -18,5 +18,65 @@
     "entryTime": "2025-10-23T11:30:00.000Z",
     "exitTime": null,
     "status": "Parked"
+  },
+  {
+    "id": 3,
+    "vehicleNumber": "MH14CD5678",
+    "customerName": "Devraj Patil",
+    "vehicleType": "2W",
+    "slotId": "B-02",
+    "entryTime": "2025-10-23T09:13:57.957Z",
+    "exitTime": null,
+    "status": "Parked"
+  },
+  {
+    "id": 4,
+    "vehicleNumber": "MH09EF9341",
+    "customerName": "Rohit ",
+    "vehicleType": "4W",
+    "slotId": "C-53",
+    "entryTime": "2025-10-23T09:22:03.236Z",
+    "exitTime": null,
+    "status": "Parked"
+  },
+  {
+    "id": 5,
+    "vehicleNumber": "MH10CD4378",
+    "customerName": "Devraj",
+    "vehicleType": "2W",
+    "slotId": "B-12",
+    "entryTime": "2025-10-23T09:27:14.472Z",
+    "exitTime": null,
+    "status": "Parked"
+  },
+  {
+    "id": 6,
+    "vehicleNumber": "MH10CD4370",
+    "customerName": "Ls",
+    "vehicleType": "4W",
+    "slotId": "B-52",
+    "entryTime": "2025-10-24T07:10:18.261Z",
+    "exitTime": null,
+    "status": "Parked"
+  },
+  {
+    "id": 7,
+    "vehicleNumber": "MH10CD4170",
+    "customerName": "Lokesh",
+    "vehicleType": "4W",
+    "slotId": "B-59",
+    "entryTime": "2025-10-24T07:11:24.640Z",
+    "exitTime": "2025-10-24T07:13:45.029Z",
+    "status": "Completed"
+  },
+  {
+    "id": 8,
+    "vehicleNumber": "MH10CD7370",
+    "customerName": "Venkat",
+    "vehicleType": "4W",
+    "slotId": "B-99",
+    "entryTime": "2025-10-24T12:01:07.884Z",
+    "exitTime": "2025-10-24T12:01:31.461Z",
+    "status": "Completed"
   }
 ]
