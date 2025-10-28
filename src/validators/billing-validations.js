@@ -1,26 +1,31 @@
 const { body, param } = require('express-validator');
 
-// Validate date format and ensure it's not in the past
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+
 const isValidDate = (value) => {
+  if (!ISO_DATE_REGEX.test(value)) {
+    return false;
+  }
   const date = new Date(value);
   if (isNaN(date.getTime())) {
-    throw new Error('Invalid date format');
+    return false;
   }
   return true;
 };
 
-// Validate check-in and check-out time relationship
 const isValidCheckOutTime = (value, { req }) => {
+  if (!isValidDate(value) || !isValidDate(req.body.checkInTime)) {
+    return false;
+  }
   const checkInTime = new Date(req.body.checkInTime);
   const checkOutTime = new Date(value);
   
   if (checkOutTime <= checkInTime) {
-    throw new Error('Check-out time must be after check-in time');
+    return false;
   }
   return true;
 };
 
-// Validators for generating a new invoice
 exports.generateInvoiceValidators = [
   body('parkingSpotId')
     .notEmpty().withMessage('Parking spot ID is required')
@@ -40,7 +45,6 @@ exports.generateInvoiceValidators = [
     .custom(isValidCheckOutTime).withMessage('Check-out time must be after check-in time')
 ];
 
-// Validators for processing payment
 exports.processPaymentValidators = [
   param('id')
     .notEmpty().withMessage('Invoice ID is required')
@@ -52,7 +56,6 @@ exports.processPaymentValidators = [
     .withMessage('Invalid payment method')
 ];
 
-// Validators for getting invoice by ID
 exports.getInvoiceValidators = [
   param('id')
     .notEmpty().withMessage('Invoice ID is required')
