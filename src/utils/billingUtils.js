@@ -3,14 +3,12 @@ const path = require('path');
 
 const BILLING_JSON_PATH = path.join(__dirname, '../data/billing.json');
 
-// Read JSON file
 async function readJsonFile() {
   try {
     const data = await fs.readFile(BILLING_JSON_PATH, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     if (error.code === 'ENOENT') {
-      // If file doesn't exist, create it with initial data
       const initialData = {
         invoices: [],
         rateCard: {
@@ -39,7 +37,6 @@ async function readJsonFile() {
   }
 }
 
-// Write to JSON file
 async function writeJsonFile(data) {
   try {
     await fs.writeFile(BILLING_JSON_PATH, JSON.stringify(data, null, 2), 'utf8');
@@ -49,7 +46,6 @@ async function writeJsonFile(data) {
   }
 }
 
-// Calculate parking duration in hours
 function calculateParkingDuration(checkInTime, checkOutTime) {
   const startTime = new Date(checkInTime);
   const endTime = new Date(checkOutTime);
@@ -58,7 +54,6 @@ function calculateParkingDuration(checkInTime, checkOutTime) {
   return durationHours;
 }
 
-// Calculate parking charges based on duration and vehicle type
 async function calculateParkingCharges(vehicleType, checkInTime, checkOutTime) {
   const duration = calculateParkingDuration(checkInTime, checkOutTime);
   const data = await readJsonFile();
@@ -68,7 +63,6 @@ async function calculateParkingCharges(vehicleType, checkInTime, checkOutTime) {
     throw new Error('Invalid vehicle type');
   }
 
-  // First hour is charged at base rate
   let totalAmount = rates.baseRate;
   
   // Additional hours are charged at additional hour rate
