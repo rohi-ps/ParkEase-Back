@@ -18,7 +18,7 @@ router.post('/', addParkingSpot);
 router.get('/:id', getParkingSpotById);
 
 // Update parking spot status
-router.patch('/:id/status', updateParkingSpotStatus);
+router.put('/:id/status', updateParkingSpotStatus);
 
 // remove parking spot
 router.delete('/:id', deleteParkingSpot);

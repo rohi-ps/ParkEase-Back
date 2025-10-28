@@ -2,22 +2,14 @@ const parkingSpots = require('../data/parkingData');
 
 // Get all parking spots
 const getAllParkingSpots = (req, res) => {
-  try {
     res.status(200).json({
       status: 'success',
       data: parkingSpots
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error fetching parking spots'
-    });
-  }
 };
 
 // Add new parking spot
 const addParkingSpot = (req, res) => {
-  try {
     const newSpot = {
       id: parkingSpots.length + 1,
       vehicleNumber: req.body.vehicleNumber,
@@ -33,17 +25,10 @@ const addParkingSpot = (req, res) => {
       status: 'success',
       data: newSpot
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error adding parking spot'
-    });
-  }
 };
 
 // Get parking spot by ID
-const getParkingSpotById = (req, res) => {
-  try {
+const getParkingSpotById = (req, res,next) => {
     const spotId = parseInt(req.params.id, 10)
     const spot = parkingSpots.find(spot => spot.id === spotId);
     if (!spot) {
@@ -51,22 +36,19 @@ const getParkingSpotById = (req, res) => {
         status: 'fail',
         message: 'Parking spot not found'
       });
+      // const error = new Error('Parking spot not found');
+      // error.statusCode = 500;
+      // return next(error);
     }
     res.status(200).json({
       status: 'success',
-      data: spot
+      data: spots
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error fetching parking spot'
-    });
-  }
+  
 };
 
 // Update parking spot status
 const updateParkingSpotStatus = (req, res) => {
-  try {
     const spotId = parseInt(req.params.id, 10)
     const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
@@ -84,16 +66,9 @@ const updateParkingSpotStatus = (req, res) => {
       status: 'success',
       data: parkingSpots[spotIndex]
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error updating parking spot'
-    });
-  }
 };
 
 const deleteParkingSpot = (req, res) => {
-  try {
     const spotId = parseInt(req.params.id, 10)
     const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
@@ -107,13 +82,7 @@ const deleteParkingSpot = (req, res) => {
       status: 'success',
       data: null
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',  
-      message: 'Error deleting parking spot'
-    });
   } 
-};
 
 
 module.exports = {
@@ -123,3 +92,4 @@ module.exports = {
   updateParkingSpotStatus,
   deleteParkingSpot
 };
+
