@@ -18,22 +18,21 @@ const {
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      status: 'fail',
-      errors: errors.array()
-    });
+    const error = new Error('Validation failed');
+    error.array = () => errors.array();
+    return next(error);
   }
   next();
 };
 
 // Get all invoices
 router.get('/invoices', 
-  // verifyToken,
+  verifyToken,
    getAllInvoices);
 
 // Get specific invoice
 router.get('/invoices/:id', 
-  // verifyToken, 
+  verifyToken, 
   getInvoiceValidators,
   validate,
   getInvoiceById
@@ -41,14 +40,14 @@ router.get('/invoices/:id',
 
 // Generate new invoice
 router.post('/invoices', 
-  // verifyToken,
+  verifyToken,
   generateInvoiceValidators,
   validate,
   generateInvoice
 );
 
 // Process payment for an invoice
-router.post('/invoices/:id/payment', 
+router.put('/invoices/:id/payment', 
   // verifyToken,
   processPaymentValidators,
   validate,

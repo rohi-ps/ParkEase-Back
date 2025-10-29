@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getAllParkingSpots,
+  addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
   deleteParkingSpot
@@ -9,6 +10,9 @@ const {
 
 // Get all parking spots
 router.get('/', getAllParkingSpots);
+
+// Add new parking spot
+router.post('/', addParkingSpot);
 
 // Get specific parking spot
 router.get('/:id', getParkingSpotById);

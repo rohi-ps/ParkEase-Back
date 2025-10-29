@@ -37,5 +37,37 @@
     "lastname": "vuddangi",
     "password": "Durgaprasad@123",
     "role": "user"
+  },
+  {
+    "email": "devraj@gmail.com",
+    "firstname": "Devraj",
+    "lastname": "Patil",
+    "password": "Devraj@12",
+    "confirmPassword": "Devraj@12",
+    "role": "user"
+  },
+  {
+    "email": "jagan@gmail.com",
+    "firstname": "Jagannath",
+    "lastname": "Kar",
+    "password": "Jagan@12",
+    "confirmPassword": "Jagan@12",
+    "role": "user"
+  },
+  {
+    "email": "dev@gmail.com",
+    "firstname": "Jagannath",
+    "lastname": "Kar",
+    "password": "Jagan@12",
+    "confirmPassword": "Jagan@12",
+    "role": "user"
+  },
+  {
+    "email": "vatsav@gmail.com",
+    "firstname": "Vatsav",
+    "lastname": "Bukka",
+    "password": "Vatsav@12",
+    "confirmPassword": "Vatsav@12",
+    "role": "admin"
   }
 ]

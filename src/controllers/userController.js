@@ -60,6 +60,9 @@ exports.login = (req, res) => {
   const user = users.find(u => u.email === email && u.password === password);
 
   if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+  if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
 
   const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '10s' });
 //   const token = jwt.sign({
