@@ -23,6 +23,82 @@
       "paymentMethod": "upi",
       "status": "pending",
       "timestamp": "2025-10-15T11:31:00Z"
+    },
+    {
+      "invoiceId": "INV384373490",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-28T08:33:04.373Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-28T08:33:04.389Z"
+    },
+    {
+      "invoiceId": "INV481539295",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-28T08:34:41.539Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-28T08:34:41.570Z"
+    },
+    {
+      "invoiceId": "INV436499741",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-29T04:00:36.499Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-29T04:00:36.514Z"
+    },
+    {
+      "invoiceId": "INV520944977",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-29T04:02:00.944Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-29T04:02:00.971Z"
     }
   ],
   "rateCard": {
