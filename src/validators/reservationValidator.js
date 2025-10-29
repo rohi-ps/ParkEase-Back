@@ -1,57 +1,64 @@
-const vehicleRegex = /^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/;
+const Joi = require('joi');
 
-const isValidVehicleNumber = (number) => vehicleRegex.test(number);
+const reservationSchema = Joi.object({
+  slotID: Joi.string().required(),
 
-const isValidVehicleType = (type) => ["2W", "4W"].includes(type);
+  VehicleType: Joi.string()
+    .valid('2W', '4W')
+    .required(),
 
-const isValidDate = (dateString) => {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(dateString)) return false;
+  vehicleNumber: Joi.string()
+    .pattern(/^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Invalid vehicle number format. Use TN01AB5678'
+    }),
 
-  const date = new Date(dateString);
-  const [year, month, day] = dateString.split("-").map(Number);
+  EntryDate: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'EntryDate must be in YYYY-MM-DD format'
+    }),
 
-  return (
-    date.getFullYear() === year &&
-    date.getMonth() + 1 === month &&
-    date.getDate() === day
-  );
-};
+  EntryTime: Joi.string()
+    .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'EntryTime must be in HH:mm format'
+    }),
 
-const isValidTime = (timeString) =>/^([0-1]\d|2[0-3]):([0-5]\d)$/.test(timeString);
+  ExitDate: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'ExitDate must be in YYYY-MM-DD format'
+    }),
+
+  ExitTime: Joi.string()
+    .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'ExitTime must be in HH:mm format'
+    })
+});
 
 const validateReservation = (data) => {
-  const requiredFields = ["slotID","VehicleType","vehicleNumber","EntryDate","EntryTime","ExitDate","ExitTime"];
-  for (const field of requiredFields) {
-    if (!data[field]) return `Missing field: ${field}`;
-  }
-
-  if (!isValidVehicleNumber(data.vehicleNumber)) {
-    return "Invalid vehicle number format. Use TN01AB5678";
-  }
-
-  if (!isValidVehicleType(data.VehicleType)) {
-    return "Vehicle type must be '2W' or '4W'";
-  }
-
-  if (!isValidDate(data.EntryDate) || !isValidDate(data.ExitDate)) {
-    return "Date must be valid and in YYYY-MM-DD format";
-  }
-
-  if (!isValidTime(data.EntryTime) || !isValidTime(data.ExitTime)) {
-    return "Time must be valid and in HH:mm format";
-  }
+  const { error } = reservationSchema.validate(data);
+  if (error) return error.details[0].message;
 
   const entry = new Date(`${data.EntryDate}T${data.EntryTime}`);
   const exit = new Date(`${data.ExitDate}T${data.ExitTime}`);
 
-  if (exit.getTime() < entry.getTime()) {
+  if (exit.getTime() <= entry.getTime()) {
     if (data.ExitDate < data.EntryDate) {
-      return "Exit date must be after entry date";
-    } else if (data.ExitDate === data.EntryDate &&data.ExitTime <= data.EntryTime) {
-      return "Exit time must be after entry time on the same day";
+      return 'Exit date must be after entry date';
+    } else if (data.ExitDate === data.EntryDate && data.ExitTime <= data.EntryTime) {
+      return 'Exit time must be after entry time on the same day';
     }
   }
+
+  return null;
 };
 
-module.exports = {validateReservation};
+module.exports = { validateReservation };
