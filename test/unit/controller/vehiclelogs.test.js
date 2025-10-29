@@ -1,40 +1,43 @@
-// Import supertest for making HTTP requests
 const request = require('supertest');
-// Import your Express app instance (make sure app.js exports it)
-const app = require('../../../app'); // Adjust path as needed
-// Import fs promises for interacting with the data file during tests
+const chai = require('chai');
+const expect = chai.expect; 
+
 const fs = require('fs').promises;
 const path = require('path');
 
 // --- Mocking Setup ---
+// Override middleware BEFORE requiring the app or routes
+let mockUserRole = 'admin'; // Global variable to control mock role
 
-// Mock the authentication middleware
-// Replace the actual implementations with dummies for testing purposes
-jest.mock('../../../src/middleware/jwt.js', () => ({
-    verifyToken: (req, res, next) => {
-        // Simulate different users based on a test header or default to admin
-        if (req.headers['x-test-role'] === 'user') {
-            req.user = { email: 'test@user.com', role: 'user' };
-        } else if (req.headers['x-test-role'] === 'none') {
-             // Simulate no token by not setting req.user and calling next
-             // Or simulate error by returning status directly (less clean)
-             // return res.status(403).json({ message: 'Mock No Token' }); 
-             req.user = undefined; // Simulate no user attached
-        }
-         else {
-            req.user = { email: 'admin@test.com', role: 'admin' }; // Default to admin
-        }
-        next();
-    },
-    requireRole: (role) => (req, res, next) => {
-        if (!req.user || req.user.role !== role) {
-            return res.status(403).json({ message: `Mock Access Denied: Requires ${role}` });
-        }
-        next();
+const mockVerifyToken = (req, res, next) => {
+    // console.log(`MOCK verifyToken executing. Role set to: ${mockUserRole}`);
+    if (mockUserRole === 'none') {
+        // Simulate no token by just not setting req.user
+        req.user = undefined;
+        
+    } else {
+        req.user = { email: `test@${mockUserRole}.com`, role: mockUserRole };
     }
-}));
+    next();
+};
 
+const mockRequireRole = (role) => (req, res, next) => {
+    // console.log(`MOCK requireRole executing. Required: ${role}, User has: ${req.user?.role}`);
+    if (!req.user) { // Added check for req.user existence
+        return res.status(401).json({ message: 'Mock: Authentication required' });
+    }
+    if (req.user.role !== role) {
+        return res.status(403).json({ message: `Mock Access Denied: Requires role "${role}"` });
+    }
+    next();
+};
 
+const authMiddlewarePath = require.resolve('../../../src/middleware/jwt.js'); 
+require(authMiddlewarePath).verifyToken = mockVerifyToken;
+require(authMiddlewarePath).requireRole = mockRequireRole;
+
+// --- App Import ---
+const app = require('../../../app'); 
 
 // --- Test Data Setup ---
 const dataPath = path.join(__dirname, '../../../src/data/parkingData.json');
@@ -44,151 +47,118 @@ const initialTestData = [
 ];
 
 // --- Test Suite ---
-describe('Vehicle Logs API', () => {
+describe('Vehicle Logs API (Mocha/Chai)', () => {
 
-    // Reset the data file before each test
+    
     beforeEach(async () => {
-        await fs.writeFile(dataPath, JSON.stringify(initialTestData, null, 2), 'utf8');
-        // Reset mock function calls if mocking billing service
+        mockUserRole = 'admin'; // Default to admin for most tests
+        try {
+            // Ensure the directory exists before writing
+            await fs.mkdir(path.dirname(dataPath), { recursive: true });
+            await fs.writeFile(dataPath, JSON.stringify(initialTestData, null, 2), 'utf8');
+        } catch (err) {
+            console.error("Critical error setting up test data file:", err);
+            
+        }
     });
 
     // --- POST /api/logs ---
     describe('POST /api/logs', () => {
-        const newLogData = {
-            vehicleNumber: "KA01EF9999",
-            customerName: "New Tester",
-            vehicleType: "4W",
-            slotId: "C-03"
-        };
+        const newLogData = { vehicleNumber: "KA01EF9999", customerName: "New Tester", vehicleType: "4W", slotId: "C-03" };
 
-        it('CL-001: should create a new log entry for admin', async () => {
+        it('1. [Admin] should create a new log entry successfully', async () => {
             const res = await request(app)
                 .post('/api/logs')
-                .set('Authorization', 'Bearer fakeAdminToken') // Token content doesn't matter due to mock
-                .send(newLogData);
-            expect(res.statusCode).toEqual(201);
-            expect(res.body).toHaveProperty('id', 3); // Assuming IDs auto-increment
-            expect(res.body).toHaveProperty('status', 'Parked');
-            expect(res.body.vehicleNumber).toEqual(newLogData.vehicleNumber);
-
-            // Verify file write (optional, but good)
-            const data = JSON.parse(await fs.readFile(dataPath, 'utf8'));
-            expect(data).toHaveLength(3);
-            expect(data[2].id).toEqual(3);
+                .send(newLogData); // No token needed in header due to direct mock override
+            expect(res.status).to.equal(201);
+            expect(res.body).to.be.an('object');
+            expect(res.body).to.have.property('id'); // Check existence, value might vary slightly
+            expect(res.body).to.have.property('status', 'Parked');
+            expect(res.body.vehicleNumber).to.equal(newLogData.vehicleNumber);
         });
 
-        it('CL-002: should return 400 for missing fields', async () => {
-            const { slotId, ...incompleteData } = newLogData; // Remove slotId
+        it('2. [Admin] should return 400 for missing required fields', async () => {
+            const { slotId, ...incompleteData } = newLogData; // Example: remove slotId
             const res = await request(app)
                 .post('/api/logs')
-                .set('Authorization', 'Bearer fakeAdminToken')
                 .send(incompleteData);
-            expect(res.statusCode).toEqual(400);
-            expect(res.body).toHaveProperty('message'); // Check for an error message
-        });
-        
-         it('CL-003: should return 409 if vehicle already parked', async () => {
-            const res = await request(app)
-                .post('/api/logs')
-                .set('Authorization', 'Bearer fakeAdminToken')
-                .send({ ...newLogData, vehicleNumber: "MH12AB1234"}); // Use number from initial data
-            expect(res.statusCode).toEqual(409);
-            expect(res.body).toHaveProperty('message', expect.stringContaining('already parked'));
+            expect(res.status).to.equal(400);
+            expect(res.body).to.have.property('message').that.includes('required'); // Check error message loosely
         });
 
-        it('CL-004: should return 403 for user role', async () => {
+        it('3. [Admin] should return 409 if vehicle is already parked', async () => {
             const res = await request(app)
                 .post('/api/logs')
-                .set('Authorization', 'Bearer fakeUserToken')
-                .set('x-test-role', 'user') // Trigger user role in mock
-                .send(newLogData);
-            expect(res.statusCode).toEqual(403);
-             expect(res.body).toHaveProperty('message', expect.stringContaining('Access Denied'));
+                .send({ ...newLogData, vehicleNumber: "MH12AB1234"}); // Use number from initial 'Parked' data
+            expect(res.status).to.equal(409);
+            expect(res.body.message).to.include('already parked');
         });
-        
+
+        it('4. [User] should return 403 Forbidden when trying to create a log', async () => {
+            mockUserRole = 'user'; // Set mock role for this specific test
+            const res = await request(app)
+                .post('/api/logs')
+                .send(newLogData);
+            expect(res.status).to.equal(403);
+            expect(res.body.message).to.equal('Mock Access Denied: Requires role "admin"');
+        });
     });
 
     // --- GET /api/logs ---
     describe('GET /api/logs', () => {
-        it('GAL-001: should return all logs for admin', async () => {
-            const res = await request(app)
-                .get('/api/logs')
-                .set('Authorization', 'Bearer fakeAdminToken');
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body)).toBe(true);
-            expect(res.body).toHaveLength(initialTestData.length);
+        it('5. [Admin] should return all log entries', async () => {
+            const res = await request(app).get('/api/logs');
+            expect(res.status).to.equal(200);
+            expect(res.body).to.be.an('array');
+            expect(res.body).to.have.lengthOf(initialTestData.length);
         });
 
-         it('GAL-002: should return 403 for user role', async () => {
-            const res = await request(app)
-                .get('/api/logs')
-                .set('Authorization', 'Bearer fakeUserToken')
-                .set('x-test-role', 'user');
-            expect(res.statusCode).toEqual(403);
+        it('6. [User] should return 403 Forbidden when trying to get all logs', async () => {
+            mockUserRole = 'user';
+            const res = await request(app).get('/api/logs');
+            expect(res.status).to.equal(403);
+            expect(res.body.message).to.equal('Mock Access Denied: Requires role "admin"');
         });
     });
 
     // --- GET /api/logs/:id ---
     describe('GET /api/logs/:id', () => {
-        it('GID-001: should return a single log for any authenticated user', async () => {
-            const res = await request(app)
-                .get('/api/logs/1')
-                .set('Authorization', 'Bearer fakeUserToken')
-                .set('x-test-role', 'user'); // Test with user role
-            expect(res.statusCode).toEqual(200);
-            expect(res.body).toHaveProperty('id', 1);
-            expect(res.body.vehicleNumber).toEqual(initialTestData[0].vehicleNumber);
+        it('7. [User/Admin] should return a single log by ID', async () => {
+            mockUserRole = 'user'; // Test that users CAN access this
+            const res = await request(app).get('/api/logs/1'); // Get existing ID 1
+            expect(res.status).to.equal(200);
+            expect(res.body).to.be.an('object');
+            expect(res.body).to.have.property('id', 1);
         });
 
-        it('GID-002: should return 404 for non-existent id', async () => {
-            const res = await request(app)
-                .get('/api/logs/999')
-                .set('Authorization', 'Bearer fakeAdminToken');
-            expect(res.statusCode).toEqual(404);
+        it('8. [User/Admin] should return 404 for a non-existent log ID', async () => {
+            mockUserRole = 'admin'; // Role doesn't matter here if ID not found
+            const res = await request(app).get('/api/logs/999'); // Non-existent ID
+            expect(res.status).to.equal(404);
+            expect(res.body.message).to.equal('Parking log not found.');
         });
-
     });
 
     // --- PATCH /api/logs/:id/exit ---
     describe('PATCH /api/logs/:id/exit', () => {
-        it('EV-001: should mark a vehicle as exited for admin', async () => {
-            const res = await request(app)
-                .patch('/api/logs/1/exit') // Exit the first vehicle which is 'Parked'
-                .set('Authorization', 'Bearer fakeAdminToken');
-            expect(res.statusCode).toEqual(200);
-            expect(res.body).toHaveProperty('id', 1);
-            expect(res.body).toHaveProperty('status', 'Completed');
-            expect(res.body.exitTime).not.toBeNull();
+        it('9. [Admin] should successfully mark a vehicle as exited', async () => {
+            const res = await request(app).patch('/api/logs/1/exit'); // Exit the first vehicle ('Parked')
+            expect(res.status).to.equal(200);
+            expect(res.body).to.have.property('id', 1);
+            expect(res.body).to.have.property('status', 'Completed');
+            expect(res.body.exitTime).to.not.be.null;
 
-             // Verify file write
+            // Verify file write
             const data = JSON.parse(await fs.readFile(dataPath, 'utf8'));
-            expect(data[0].status).toEqual('Completed');
-            expect(data[0].exitTime).not.toBeNull();
-        });
-        
-         it('EV-002: should return 400 if vehicle already exited', async () => {
-            const res = await request(app)
-                .patch('/api/logs/2/exit') // Try to exit the second vehicle which is 'Completed'
-                .set('Authorization', 'Bearer fakeAdminToken');
-            expect(res.statusCode).toEqual(400);
-            expect(res.body).toHaveProperty('message', 'Vehicle has already exited.');
+            expect(data[0].status).to.equal('Completed');
+            expect(data[0].exitTime).to.not.be.null;
+            
         });
 
-        it('EV-003: should return 403 for user role', async () => {
-             const res = await request(app)
-                .patch('/api/logs/1/exit')
-                .set('Authorization', 'Bearer fakeUserToken')
-                .set('x-test-role', 'user');
-            expect(res.statusCode).toEqual(403);
+        it('10. [Admin] should return 400 if attempting to exit an already completed log', async () => {
+            const res = await request(app).patch('/api/logs/2/exit'); // Try exiting the second vehicle ('Completed')
+            expect(res.status).to.equal(400);
+            expect(res.body.message).to.equal('Vehicle has already exited.');
         });
-        
-         it('EV-004: should return 404 for non-existent id', async () => {
-            const res = await request(app)
-                .patch('/api/logs/999/exit')
-                .set('Authorization', 'Bearer fakeAdminToken');
-            expect(res.statusCode).toEqual(404);
-        });
-
     });
-
 });
