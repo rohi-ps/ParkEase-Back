@@ -14,7 +14,6 @@ app.use(morgan('dev')); // Logging
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
-// app.use(csrfmiddleware);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -26,7 +25,7 @@ const routes = require('./src/routes/userRoutes');
 const parkingRoutes = require('./src/routes/parkingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
 const reservationRoutes = require('./src/routes/reservationRoutes');
-const logRoutes=require('./src/routes/logroutes');
+const logRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
 app.use('/api', routes);

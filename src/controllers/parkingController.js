@@ -15,10 +15,37 @@ const getAllParkingSpots = (req, res) => {
   }
 };
 
+// Add new parking spot
+const addParkingSpot = (req, res) => {
+  try {
+    const newSpot = {
+      id: parkingSpots.length + 1,
+      vehicleNumber: req.body.vehicleNumber,
+      customerName: req.body.customerName,
+      vehicleType: req.body.vehicleType,
+      slotId: req.body.slotId,
+      entryTime: new Date(), // 2 hours ago
+      exitTime: null,
+      status: req.body.status || 'available'
+    };
+    parkingSpots.push(newSpot);
+    res.status(201).json({
+      status: 'success',
+      data: newSpot
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Error adding parking spot'
+    });
+  }
+};
+
 // Get parking spot by ID
 const getParkingSpotById = (req, res) => {
   try {
-    const spot = parkingSpots.find(spot => spot.id === req.params.id);
+    const spotId = parseInt(req.params.id, 10)
+    const spot = parkingSpots.find(spot => spot.id === spotId);
     if (!spot) {
       return res.status(404).json({
         status: 'fail',
@@ -40,7 +67,8 @@ const getParkingSpotById = (req, res) => {
 // Update parking spot status
 const updateParkingSpotStatus = (req, res) => {
   try {
-    const spotIndex = parkingSpots.findIndex(spot => spot.id === req.params.id);
+    const spotId = parseInt(req.params.id, 10)
+    const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
       return res.status(404).json({
         status: 'fail',
@@ -49,7 +77,7 @@ const updateParkingSpotStatus = (req, res) => {
     }
     parkingSpots[spotIndex] = {
       ...parkingSpots[spotIndex],
-      isOccupied: req.body.isOccupied
+      status: req.body.status || parkingSpots[spotIndex].status
     };
 
     res.status(200).json({
@@ -66,7 +94,8 @@ const updateParkingSpotStatus = (req, res) => {
 
 const deleteParkingSpot = (req, res) => {
   try {
-    const spotIndex = parkingSpots.findIndex(spot => spot.id === req.params.id);
+    const spotId = parseInt(req.params.id, 10)
+    const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
     if (spotIndex === -1) {
       return res.status(404).json({
         status: 'fail',
@@ -89,6 +118,7 @@ const deleteParkingSpot = (req, res) => {
 
 module.exports = {
   getAllParkingSpots,
+  addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
   deleteParkingSpot
