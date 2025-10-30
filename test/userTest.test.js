@@ -2,13 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const request = require('supertest');
 const { expect } = require('chai');
-const app = require('../app'); // Adjust path to your Express app
+const app = require('../app');
 
 const usersFile = path.join(__dirname, '../data/users.json');
 
 describe('Auth API Tests', () => {
   const testUser = {
-    email: 'testuser@example.com',
+    email: 'test@example.com',
     firstname: 'Test',
     lastname: 'User',
     password: 'TestPass123',
@@ -16,7 +16,6 @@ describe('Auth API Tests', () => {
   };
 
   before(() => {
-    // Clean up test user if it exists
     if (fs.existsSync(usersFile)) {
       const users = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
       const filtered = users.filter(u => u.email !== testUser.email);

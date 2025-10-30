@@ -1,41 +1,16 @@
 [
   {
-    "email": "vuddangisaivenkatadurgaprasad@gmail.com",
+    "email": "vuddangivenkatadurgaprasad@gmail.com",
     "firstname": "durgaprasad",
     "lastname": "vuddangi",
     "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
     "role": "user"
   },
   {
-    "email": "vuddangsaivenkatadurgaprasad@gmail.com",
+    "email": "vuddangikatadurgaprasad@gmail.com",
     "firstname": "durgaprasad",
     "lastname": "vuddangi",
     "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "vudangsaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "vuangsaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "prasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "role": "user"
+    "role": "admin"
   }
 ]

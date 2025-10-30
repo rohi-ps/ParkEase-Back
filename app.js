@@ -3,9 +3,11 @@ require('dotenv').config();
 const errorHandler = require('./src/middleware/errorHandler');
 const express = require('express');
 const helmet = require('helmet');
+const passport=require('./src/config/passportconfig.js')
 const morgan = require('morgan');
 const cors=require('cors');
 const app = express();
+app.use(passport.initialize());
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
