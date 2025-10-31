@@ -1,22 +1,14 @@
 [
   {
-    "id": 1,
-    "vehicleNumber": "MH12AB1234",
-    "customerName": "Test User 1",
+    "slotId": "A01",
     "vehicleType": "4W",
-    "slotId": "A-01",
-    "entryTime": "2025-10-30T05:46:49.474Z",
-    "exitTime": "2025-10-30T06:46:49.797Z",
-    "status": "Completed"
+    "status": "Parked",
+    "location": "Level 1"
   },
   {
-    "id": 2,
-    "vehicleNumber": "MH14CD5678",
-    "customerName": "Test User 2",
+    "slotId": "B02",
     "vehicleType": "2W",
-    "slotId": "B-02",
-    "entryTime": "2025-10-30T04:46:49.475Z",
-    "exitTime": "2025-10-30T06:16:49.475Z",
-    "status": "Completed"
+    "status": "Completed",
+    "location": "Level 2"
   }
 ]
