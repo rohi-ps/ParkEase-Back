@@ -97,5 +97,19 @@
     "lastname": "Tiwari",
     "password": "Password123",
     "role": "user"
+  },
+  {
+    "email": "testuser_1761910125131@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
+  },
+  {
+    "email": "testuser_1761910262641@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
   }
 ]
