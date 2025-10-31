@@ -12,5 +12,26 @@
     "lastname": "vuddangi",
     "password": "Durgaprasad@123",
     "role": "admin"
+  },
+  {
+    "email": "testuser@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
+  },
+  {
+    "email": "testuser_1761902540777@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
+  },
+  {
+    "email": "testuser_1761902686705@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
   }
 ]
