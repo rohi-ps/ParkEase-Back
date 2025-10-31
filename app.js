@@ -1,5 +1,5 @@
 // const csrfmiddleware=require('./src/middleware/csrfmiddleware')
-// require('dotenv').config();
+require('dotenv').config();
 const errorHandler = require('./src/middleware/errorHandler');
 const express = require('express');
 const helmet = require('helmet');

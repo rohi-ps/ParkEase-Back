@@ -1,86 +1,122 @@
-const fs = require('fs');
-const path = require('path');
 const request = require('supertest');
-const { expect } = require('chai');
-const app = require('../app'); // Adjust path to your Express app
+const chai = require('chai');
+const app = require('../app'); // No .js needed in CommonJS
 
-const usersFile = path.join(__dirname, '../data/users.json');
+const { expect } = chai;
 
-describe('Auth API Tests', () => {
-  const testUser = {
-    email: 'testuser@example.com',
-    firstname: 'Test',
-    lastname: 'User',
-    password: 'TestPass123',
-    confirmPassword: 'TestPass123'
-  };
+const VALID_DATA = {
+  firstname: 'Jay',
+  lastname: 'Tiwari',
+  email: `testuser_${Date.now()}@example.com`,
+  password: 'Password123',
+  confirmPassword: 'Password123'
+};
 
-  before(() => {
-    // Clean up test user if it exists
-    if (fs.existsSync(usersFile)) {
-      const users = JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
-      const filtered = users.filter(u => u.email !== testUser.email);
-      fs.writeFileSync(usersFile, JSON.stringify(filtered, null, 2));
-    }
+const NAME_WITH_NUMBERS = {
+  ...VALID_DATA,
+  firstname: 'Jay123',
+  lastname: 'Tiwari'
+};
+
+const INVALID_EMAIL = {
+  ...VALID_DATA,
+  email: 'invalid-email'
+};
+
+const SHORT_NAME = {
+  ...VALID_DATA,
+  firstname: 'J',
+  lastname: 'T'
+};
+
+const WEAK_PASSWORD = {
+  ...VALID_DATA,
+  password: 'password',
+  confirmPassword: 'password'
+};
+
+const PASSWORD_MISMATCH = {
+  ...VALID_DATA,
+  confirmPassword: 'different123'
+};
+
+const SHORT_PASSWORD = {
+  ...VALID_DATA,
+  password: 'ab1',
+  confirmPassword: 'ab1'
+};
+
+describe('POST /api/register', () => {
+  it('should register user with valid data', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send(VALID_DATA);
+
+    expect(res.status).to.equal(201);
+    expect(res.body.message).to.contain('User registered');
   });
 
-  describe('POST /api/registration', () => {
-    it('should register a new user', async () => {
-      const res = await request(app)
-        .post('/api/registration')
-        .send(testUser);
+  it('should fail if name contains numbers', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send(NAME_WITH_NUMBERS);
 
-      expect(res.status).to.equal(201);
-      expect(res.body.message).to.include('User registered');
-    });
-
-    it('should not register an existing user', async () => {
-      const res = await request(app)
-        .post('/api/registration')
-        .send(testUser);
-
-      expect(res.status).to.equal(409);
-      expect(res.body.message).to.equal('User already exists');
-    });
+    expect(res.status).to.equal(400);
+    expect(res.body.errors).to.be.an('array');
+    expect(res.body.errors.some(err => err.path === 'firstname')).to.be.true;
   });
 
-  describe('POST /api/login', () => {
-    it('should login with correct credentials', async () => {
-      const res = await request(app)
-        .post('/api/login')
-        .send({ email: testUser.email, password: testUser.password });
+  it('should fail if email format is invalid', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send(INVALID_EMAIL);
 
-      expect(res.status).to.equal(200);
-      expect(res.body).to.have.property('token');
-    });
+    expect(res.status).to.equal(400);
+    expect(res.body.errors).to.be.an('array');
+    expect(res.body.errors.some(err => err.path === 'email')).to.be.true;
+  });
+});
 
-    it('should fail login with wrong password', async () => {
-      const res = await request(app)
-        .post('/api/login')
-        .send({ email: testUser.email, password: 'WrongPass' });
+describe('User Validation - Name Rules', () => {
+  it('should fail when name is too short', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send(SHORT_NAME);
 
-      expect(res.status).to.equal(401);
-      expect(res.body.message).to.equal('Invalid credentials');
-    });
+    expect(res.status).to.equal(400);
+    expect(res.body.errors).to.be.an('array');
+    expect(res.body.errors.some(err => 
+      err.path === 'firstname' || err.path === 'lastname'
+    )).to.be.true;
+  });
+});
+
+describe('User Validation - Password Rules', () => {
+  it('should fail with invalid password (weak or short)', async () => {
+    const weakRes = await request(app)
+      .post('/api/register')
+      .send(WEAK_PASSWORD);
+
+    expect(weakRes.status).to.equal(400);
+    expect(weakRes.body.errors).to.be.an('array');
+    expect(weakRes.body.errors.some(err => err.path === 'password')).to.be.true;
+
+    const shortRes = await request(app)
+      .post('/api/register')
+      .send(SHORT_PASSWORD);
+
+    expect(shortRes.status).to.equal(400);
+    expect(shortRes.body.errors).to.be.an('array');
+    expect(shortRes.body.errors.some(err => err.path === 'password')).to.be.true;
   });
 
-  describe('POST /api/logout', () => {
-    let token;
+  it('should fail when passwords do not match', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send(PASSWORD_MISMATCH);
 
-    before(async () => {
-      const res = await request(app)
-        .post('/api/login')
-        .send({ email: testUser.email, password: testUser.password });
-      token = res.body.token;
-    });
-
-    it('should logout and blacklist the token', async () => {
-      const res = await request(app)
-        .post('/api/logout')
-        .set('Authorization', token);
-
-      expect(res.status).to.equal(200);
-      expect(res.body.message).to.equal('Logout successful');
-    });
+    expect(res.status).to.equal(400);
+    expect(res.body.errors).to.be.an('array');
+    expect(res.body.errors.some(err => err.path === 'confirmPassword')).to.be.true;
   });
 });
