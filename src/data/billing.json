@@ -175,6 +175,63 @@
         "hours": 2
       },
       "paidAt": "2025-10-30T06:46:49.557Z"
+    },
+    {
+      "invoiceId": "INV423212940",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-31T09:20:23.212Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-31T09:20:23.317Z"
+    },
+    {
+      "invoiceId": "INV541361429",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-31T09:22:21.361Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-31T09:22:21.370Z"
+    },
+    {
+      "invoiceId": "INV687199544",
+      "userId": "USER123",
+      "parkingSpotId": "A1",
+      "vehicleType": "4W",
+      "checkInTime": "2025-10-28T10:00:00Z",
+      "checkOutTime": "2025-10-28T12:00:00Z",
+      "amount": 100,
+      "paymentMethod": "credit_card",
+      "status": "paid",
+      "timestamp": "2025-10-31T09:24:47.199Z",
+      "duration": 2,
+      "breakdown": {
+        "baseRate": 60,
+        "additionalHourRate": 40,
+        "hours": 2
+      },
+      "paidAt": "2025-10-31T09:24:47.223Z"
     }
   ],
   "rateCard": {

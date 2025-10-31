@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { sendWelcomeEmail } = require('../validators/mailservice');
+// Email service temporarily disabled
 const jwt = require('jsonwebtoken');
 const { addToken} = require('../utils/tokenBlackList.js')
 const crypto = require('crypto');
@@ -34,17 +34,7 @@ exports.register = async (req, res) => {
     writeUsers(users);
     console.log("User saved to file");
 
-    try {
-      const info = await sendWelcomeEmail(email, firstname);
-      if (info.accepted.includes(email)) {
-        return res.status(201).json({ message: 'User registered and email sent successfully' });
-      } else {
-        return res.status(201).json({ message: 'User registered, but email was rejected' });
-      }
-    } catch (emailErr) {
-      console.error('Email error:', emailErr);
-      return res.status(201).json({ message: 'User registered, but email failed to send' });
-    }
+    return res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Register error:', err);
     if (!res.headersSent) {
