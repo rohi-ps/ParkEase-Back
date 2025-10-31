@@ -64,7 +64,7 @@ exports.login = (req, res) => {
       throw new Error('JWT_SECRET is not configured');
     }
 
-  const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '10s' });
+  const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '15m' });
 //   const token = jwt.sign({
 //   email: user.email,
 //   role: user.role,
