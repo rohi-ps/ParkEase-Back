@@ -8,20 +8,25 @@ const {
   deleteParkingSpot
 } = require('../controllers/parkingController');
 
+const {
+    validateAddParkingSpot,
+    validateParkingSpotId
+} =  require('../middleware/parkingValidationMiddleware');
+
 // Get all parking spots
 router.get('/', getAllParkingSpots);
 
 // Add new parking spot
-router.post('/', addParkingSpot);
+router.post('/',validateAddParkingSpot, addParkingSpot);
 
 // Get specific parking spot
-router.get('/:id', getParkingSpotById);
+router.get('/:id',validateParkingSpotId, getParkingSpotById);
 
 // Update parking spot status
-router.put('/:id/status', updateParkingSpotStatus);
+router.put('/:id/status',validateParkingSpotId, updateParkingSpotStatus);
 
 // remove parking spot
-router.delete('/:id', deleteParkingSpot);
+router.delete('/:id',validateParkingSpotId, deleteParkingSpot);
 
 
 module.exports = router;

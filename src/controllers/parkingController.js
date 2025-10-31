@@ -11,14 +11,10 @@ const getAllParkingSpots = (req, res) => {
 // Add new parking spot
 const addParkingSpot = (req, res) => {
     const newSpot = {
-      id: parkingSpots.length + 1,
-      vehicleNumber: req.body.vehicleNumber,
-      customerName: req.body.customerName,
-      vehicleType: req.body.vehicleType,
       slotId: req.body.slotId,
-      entryTime: new Date(), // 2 hours ago
-      exitTime: null,
-      status: req.body.status || 'available'
+      vehicleType: req.body.vehicleType,
+      status: req.body.status || 'available',
+      location: req.body.location || 'Not Specified',
     };
     parkingSpots.push(newSpot);
     res.status(201).json({
@@ -28,29 +24,27 @@ const addParkingSpot = (req, res) => {
 };
 
 // Get parking spot by ID
-const getParkingSpotById = (req, res,next) => {
-    const spotId = parseInt(req.params.id, 10)
-    const spot = parkingSpots.find(spot => spot.id === spotId);
+const getParkingSpotById = (req, res) => {
+    const spotId = req.params.slotId
+    const spot = parkingSpots.find(spot => spot.slotId === spotId);
     if (!spot) {
       return res.status(404).json({
         status: 'fail',
         message: 'Parking spot not found'
       });
-      // const error = new Error('Parking spot not found');
-      // error.statusCode = 500;
-      // return next(error);
+
     }
     res.status(200).json({
       status: 'success',
-      data: spots
+      data: spot
     });
   
 };
 
 // Update parking spot status
 const updateParkingSpotStatus = (req, res) => {
-    const spotId = parseInt(req.params.id, 10)
-    const spotIndex = parkingSpots.findIndex(spot => spot.id === spotId);
+    const spotId = req.params.slotId
+    const spotIndex = parkingSpots.findIndex(spot => spot.slotId === spotId);
     if (spotIndex === -1) {
       return res.status(404).json({
         status: 'fail',
