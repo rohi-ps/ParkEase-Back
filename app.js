@@ -6,6 +6,10 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cors=require('cors');
 const app = express();
+const connectDatabase = require('./src/config/database');
+
+// Connect to database
+connectDatabase();
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
