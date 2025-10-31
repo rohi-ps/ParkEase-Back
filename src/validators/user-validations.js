@@ -13,11 +13,13 @@ exports.registerValidators = [
   body('firstname')
     .trim()
     .notEmpty().withMessage('Firstname is required')
-    .isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
+    .isLength({ min: 3 }).withMessage('Firstname must be at least 3 characters')
+    .matches(/^[A-Za-z\s]+$/).withMessage('Firstname must contain only letters'),
   body('lastname')
     .trim()
     .notEmpty().withMessage('Lastname is required')
-    .isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
+    .isLength({ min: 3 }).withMessage('Lastname must be at least 3 characters')
+    .matches(/^[A-Za-z\s]+$/).withMessage('Lastname must contain only letters'),
 
   body('password').custom(isStrongPassword),
   body('confirmPassword').custom((value, { req }) => {
