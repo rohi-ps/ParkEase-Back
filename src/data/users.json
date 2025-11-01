@@ -33,5 +33,12 @@
     "lastname": "Tiwari",
     "password": "Password123",
     "role": "user"
+  },
+  {
+    "email": "testuser_1761906256891@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
   }
 ]

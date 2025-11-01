@@ -7,6 +7,10 @@ const passport=require('./src/config/passportconfig.js')
 const morgan = require('morgan');
 const cors=require('cors');
 const app = express();
+const connectDatabase = require('./src/config/database');
+
+// Connect to database
+connectDatabase();
 app.use(passport.initialize());
 // Middleware
 app.use(helmet()); // Security headers
@@ -28,11 +32,11 @@ const reservationRoutes = require('./src/routes/reservationRoutes');
 const logRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
-app.use('/api', routes);
-app.use('/api/v1/parking-spots', parkingRoutes);
-app.use('/api/v1/billing', billingRoutes);
-app.use('/api/v1/reservations', reservationRoutes);
-app.use('/api/logs', logRoutes);
+// app.use('/api', routes);
+// app.use('/api/v1/parking-spots', parkingRoutes);
+// app.use('/api/v1/billing', billingRoutes);
+// app.use('/api/v1/reservations', reservationRoutes);
+// app.use('/api/logs', logRoutes);
 // Error handling
 app.use((req, res, next) => {
   const error = new Error('Not Found');
