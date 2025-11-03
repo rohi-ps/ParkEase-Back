@@ -36,7 +36,7 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '15m' }
     );
-    res.status(200).json({ message: 'Login successful', token, role: user.role,email: user.email });
+    res.status(200).json({ message: 'Login successful', token, role: user.role,email: user.email,id: user._id });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });
   }
