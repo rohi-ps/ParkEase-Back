@@ -10,17 +10,19 @@ exports.registerValidators = [
   body('email')
     .isEmail().withMessage('Email must be valid'),
 
-  body('firstname')
+  body('firstName')
     .trim()
     .notEmpty().withMessage('Firstname is required')
     .isLength({ min: 3 }).withMessage('Firstname must be at least 3 characters')
     .matches(/^[A-Za-z\s]+$/).withMessage('Firstname must contain only letters'),
-  body('lastname')
+  body('lastName')
     .trim()
     .notEmpty().withMessage('Lastname is required')
     .isLength({ min: 3 }).withMessage('Lastname must be at least 3 characters')
     .matches(/^[A-Za-z\s]+$/).withMessage('Lastname must contain only letters'),
-
+  body('phone')
+  .notEmpty().withMessage('Phone number is required')
+  .isMobilePhone().withMessage('Phone number must be valid'),
   body('password').custom(isStrongPassword),
   body('confirmPassword').custom((value, { req }) => {
   const password = req.body.password;
