@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { validationResult } = require('express-validator');
-const { verifyToken } = require('../middleware/jwt');
 const {
   getAllInvoices,
   getInvoiceById,
@@ -27,12 +26,10 @@ const validate = (req, res, next) => {
 
 // Get all invoices
 router.get('/invoices', 
-  verifyToken,
    getAllInvoices);
 
 // Get specific invoice
 router.get('/invoices/:id', 
-  verifyToken, 
   getInvoiceValidators,
   validate,
   getInvoiceById
@@ -40,7 +37,6 @@ router.get('/invoices/:id',
 
 // Generate new invoice
 router.post('/invoices', 
-  verifyToken,
   generateInvoiceValidators,
   validate,
   generateInvoice
@@ -48,7 +44,6 @@ router.post('/invoices',
 
 // Process payment for an invoice
 router.put('/invoices/:id/payment', 
-  // verifyToken,
   processPaymentValidators,
   validate,
   processPayment

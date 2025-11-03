@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
  
 const parkingSlotSchema = new mongoose.Schema({
-    slotId: {
+    slotName: {
         type: String,
         required: [true, 'Slot ID is required'],
         unique: true,
