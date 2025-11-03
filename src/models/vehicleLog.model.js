@@ -24,14 +24,14 @@ const vehicleLogSchema = new Schema(
     
     slotId: {
       type: Schema.Types.ObjectId,
-      ref: 'ParkingSlot', // Assumes a 'ParkingSlot' model
+      ref: 'ParkingSlot', 
       required: [true, "Parking slot is required."],
       index: true
     },
    
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'User', // Assumes a 'User' model
+      ref: 'User', 
       default: null,
       index: true
     }
@@ -43,9 +43,6 @@ const vehicleLogSchema = new Schema(
   }
 );
 
-/**
- * Add a compound index to quickly find currently parked vehicles
- */
 vehicleLogSchema.index({ exitTime: 1 });
 
 const VehicleLog = mongoose.model('VehicleLog', vehicleLogSchema);
