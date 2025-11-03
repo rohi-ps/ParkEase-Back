@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
+const { verifyToken } = require('../middleware/jwt');
+
+
 const {
   getAllParkingSpots,
   addParkingSpot,
@@ -14,19 +18,19 @@ const {
 } =  require('../middleware/parkingValidationMiddleware');
 
 // Get all parking spots
-router.get('/', getAllParkingSpots);
+router.get('/', verifyToken, getAllParkingSpots);
 
 // Add new parking spot
-router.post('/',validateAddParkingSpot, addParkingSpot);
+router.post('/', verifyToken, validateAddParkingSpot, addParkingSpot);
 
 // Get specific parking spot
-router.get('/:id',validateParkingSpotId, getParkingSpotById);
+router.get('/:id', verifyToken, validateParkingSpotId, getParkingSpotById);
 
 // Update parking spot status
-router.put('/:id/status',validateParkingSpotId, updateParkingSpotStatus);
+router.put('/:id/status', verifyToken, validateParkingSpotId, updateParkingSpotStatus);
 
 // remove parking spot
-router.delete('/:id',validateParkingSpotId, deleteParkingSpot);
+router.delete('/:id', verifyToken, validateParkingSpotId, deleteParkingSpot);
 
 
 module.exports = router;
