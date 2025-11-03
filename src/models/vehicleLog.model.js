@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 
 const vehicleLogSchema = new Schema(
   {
-    
     vehicleNumber: {
       type: String,
       required: [true, "Vehicle number is required."],

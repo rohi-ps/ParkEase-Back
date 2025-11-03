@@ -1,73 +1,16 @@
 [
   {
-    "email": "vuddangisaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "vuddangsaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "vudangsaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "vuangsaivenkatadurgaprasad@gmail.com",
-    "firstname": "durgaprasad",
-    "lastname": "vuddangi",
-    "password": "Durgaprasad@123",
-    "confirmPassword": "Durgaprasad@123",
-    "role": "user"
-  },
-  {
-    "email": "prasad@gmail.com",
+    "email": "vuddangivenkatadurgaprasad@gmail.com",
     "firstname": "durgaprasad",
     "lastname": "vuddangi",
     "password": "Durgaprasad@123",
     "role": "user"
   },
   {
-    "email": "devraj@gmail.com",
-    "firstname": "Devraj",
-    "lastname": "Patil",
-    "password": "Devraj@12",
-    "confirmPassword": "Devraj@12",
-    "role": "user"
-  },
-  {
-    "email": "jagan@gmail.com",
-    "firstname": "Jagannath",
-    "lastname": "Kar",
-    "password": "Jagan@12",
-    "confirmPassword": "Jagan@12",
-    "role": "user"
-  },
-  {
-    "email": "dev@gmail.com",
-    "firstname": "Jagannath",
-    "lastname": "Kar",
-    "password": "Jagan@12",
-    "confirmPassword": "Jagan@12",
-    "role": "user"
-  },
-  {
-    "email": "vatsav@gmail.com",
-    "firstname": "Vatsav",
-    "lastname": "Bukka",
-    "password": "Vatsav@12",
-    "confirmPassword": "Vatsav@12",
+    "email": "vuddangikatadurgaprasad@gmail.com",
+    "firstname": "durgaprasad",
+    "lastname": "vuddangi",
+    "password": "Durgaprasad@123",
     "role": "admin"
   },
   {
@@ -93,6 +36,20 @@
   },
   {
     "email": "testuser_1761906256891@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
+  },
+  {
+    "email": "testuser_1761910125131@example.com",
+    "firstname": "Jay",
+    "lastname": "Tiwari",
+    "password": "Password123",
+    "role": "user"
+  },
+  {
+    "email": "testuser_1761910262641@example.com",
     "firstname": "Jay",
     "lastname": "Tiwari",
     "password": "Password123",
