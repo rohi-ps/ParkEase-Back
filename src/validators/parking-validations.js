@@ -38,7 +38,7 @@ const parkingSpotValidationSchema = checkSchema({
 });
 
 const parkingslotIdValidationSchema = checkSchema({
-    slotId: {
+    id: {
         in: ['params'],
         isString: {
             errorMessage: 'Slot ID must be a string'

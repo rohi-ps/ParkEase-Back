@@ -1,36 +1,38 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const reservationSchema = new mongoose.Schema({
-  slotID: { 
+  slotId: {
+    type: Schema.Types.ObjectId,
+    ref: "ParkingSlot", // Assumes a 'ParkingSlot' model
+    required: [true, "Parking slot is required."],
+    index: true,
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User", // Assumes a 'User' model
+    default: null,
+    index: true,
+  },
+  vehicleNumber: {
     type: String,
-    required: true, 
-    unique: true 
+    required: true,
   },
-  VehicleType: { 
-    type: String, 
-    enum: ['2W', '4W'], 
-    required: true 
+  entryDate: {
+    type: String,
+    required: true,
   },
-  vehicleNumber: { 
-    type: String, 
-    required: true 
+  exitDate: {
+    type: String,
+    required: true,
   },
-  EntryDate: { 
-    type: String, 
-    required: true 
+  entryTime: {
+    type: String,
+    required: true,
   },
-  EntryTime: { 
-    type: String, 
-    required: true 
-    },
-  ExitDate: { 
-    type: String, 
-    required: true 
-    },
-  ExitTime: { 
-    type: String, 
-    required: true 
-    }
+  exitTime: {
+    type: String,
+    required: true,
+  },
 });
 
-module.exports = mongoose.model('Reservation', reservationSchema);
+module.exports = mongoose.model("Reservation", reservationSchema);
