@@ -61,9 +61,7 @@ const generateInvoice = async (req, res) => {
       vehicleType,
       checkInTime,
       checkOutTime,
-      amount: charges.totalAmount,
-      duration: charges.duration,
-      breakdown: {
+      totalAmount: {
         baseRate: charges.baseRate,
         additionalHourRate: charges.additionalHourRate,
         hours: charges.duration

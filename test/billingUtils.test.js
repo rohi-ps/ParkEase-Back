@@ -12,7 +12,7 @@ describe('Billing Utils', () => {
         '2025-10-28T10:00:00Z',
         '2025-10-28T10:45:00Z'
       );
-      expect(result).to.have.property('totalAmount').equal(30); // Base rate for 2W
+      expect(result).to.have.property('totalAmount').equal(30); // Base rate + (additionalHours * additionalHourRate)
     });
 
     it('should calculate charges correctly for 4W with additional hours', async () => {
@@ -23,6 +23,9 @@ describe('Billing Utils', () => {
       );
       // Base rate (60) + 2 additional hours (40 * 2) = 140
       expect(result).to.have.property('totalAmount').equal(140);
+      expect(result.baseRate).to.equal(60);
+      expect(result.additionalHourRate).to.equal(40);
+      expect(result.duration).to.equal(3);
     });
 
     it('should throw error for invalid vehicle type', async () => {
