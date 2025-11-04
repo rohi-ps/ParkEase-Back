@@ -9,13 +9,16 @@ const vehicleLogSchema = new Schema(
       trim: true,
       index: true
     },
-    
+    vehicleType: {
+      type: String,
+      required: [true, "Vehicle type is required."],
+      enum: ['2W', '4W']
+    },
     entryTime: {
       type: Date,
       required: [true, "Entry time is required."],
       default: Date.now
     },
-    
     exitTime: {
       type: Date,
       default: null
@@ -26,6 +29,12 @@ const vehicleLogSchema = new Schema(
       ref: 'ParkingSlot', 
       required: [true, "Parking slot is required."],
       index: true
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ['Parked', 'Completed'],
+      default: 'Parked' // This will fix your createLog logic!
     },
    
     userId: {
