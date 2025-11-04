@@ -5,7 +5,7 @@ const { register, login, logout } = require('../controllers/userController');
 const { requireRole } = require('../middleware/jwt');
 const { registerValidators, loginValidators } = require('../validators/user-validations');
 const { validationResult } = require('express-validator');
-const User = require('../models/user');
+const User = require('../models/userCredentials');
 router.post('/register', registerValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });

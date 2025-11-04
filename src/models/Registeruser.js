@@ -12,21 +12,18 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true
   },
-  phone: {
+    phone: {
     type: String,
     required: true,
     match: /^[6-9]\d{9}$/
   },
-  role: {
-    type: String,
-    default: 'user'
-  },
-  password: {
-    type: String,
-    required: true
-  }
+
+  invoices: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Invoice'
+    }
+  ]
 }, { timestamps: true });
 
-
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('user', userSchema);
