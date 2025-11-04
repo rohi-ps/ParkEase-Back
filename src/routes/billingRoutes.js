@@ -4,18 +4,11 @@ const { validationResult } = require('express-validator');
 const passport = require('../config/passportconfig');
 const { requireRole } = require('../middleware/jwt');
 const {
-  getAllInvoices,
-  getInvoiceById,
-  generateInvoice,
-  processPayment,
-  getPaymentMethods
-} = require('../controllers/billingController');
-const {
   generateInvoiceValidators,
   processPaymentValidators,
   getInvoiceValidators
 } = require('../validators/billing-validations');
-const { rateValidators } = require('../validators/rate-validations');
+const { createRateValidators, updateRateValidators } = require('../validators/rate-validations');
 const {
   getAllInvoices,
   getInvoiceById,
@@ -84,7 +77,7 @@ router.get('/rates',
 router.post('/rates',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
-  rateValidators,
+  createRateValidators,
   validate,
   createRate
 );
@@ -92,7 +85,7 @@ router.post('/rates',
 router.put('/rates/:vehicleType',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
-  rateValidators,
+  updateRateValidators,
   validate,
   updateRate
 );

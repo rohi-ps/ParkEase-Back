@@ -24,7 +24,7 @@ const invoiceSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet'],
+    enum: ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet', null],
     default: null
   },
   status: {
