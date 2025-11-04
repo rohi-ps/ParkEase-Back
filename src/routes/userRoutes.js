@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
+const passport = require('../config/passportconfig');
 const { register, login, logout } = require('../controllers/userController');
 const { requireRole } = require('../middleware/jwt');
 const { registerValidators, loginValidators } = require('../validators/user-validations');
 const { validationResult } = require('express-validator');
-
+const User = require('../models/user');
 router.post('/register', registerValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -21,9 +21,11 @@ router.post('/login', loginValidators, (req, res) => {
 router.get('/profile',
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
+    console.log('Authenticated user:', req.user);
     res.json({ message: `Welcome ${req.user.email}` });
   }
 );
+
 
 router.get('/admin',
   passport.authenticate('jwt', { session: false }),
@@ -37,5 +39,10 @@ router.post('/logout',
   passport.authenticate('jwt', { session: false }),
   logout
 );
+router.get('/getallusers', async (req, res) => {
+  const users = await User.find();
+  res.json(users);
+});
+
 
 module.exports = router;
