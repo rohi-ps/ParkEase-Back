@@ -24,10 +24,10 @@ function validateCreateLogData(data) {
         errors.push('Vehicle type must be either "2W" or "4W".');
     }
 
-    // Rule 5: Slot ID Format (Example: A-1 or C-15)
-    const slotIdRegex = /^[A-Z]-\d{1,2}$/;
+    // Rule 5: Slot ID Format (Example: A1 or C15)
+    const slotIdRegex = /^[A-Z]\d{1,2}$/;
      if (slotId && !slotIdRegex.test(slotId)) {
-         errors.push('Slot ID must be in the format like A-1 or C-15.');
+         errors.push('Slot ID must be in the format like A1 or C15.');
      }
 
     return errors;
