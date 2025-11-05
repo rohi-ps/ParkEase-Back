@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('../config/passportconfig');
-const { register, login, logout } = require('../controllers/userController');
+const { register, login, logout, searchUsersById } = require('../controllers/userController');
 const { requireRole } = require('../middleware/jwt');
 const { registerValidators, loginValidators } = require('../validators/user-validations');
 const { validationResult } = require('express-validator');
@@ -43,6 +43,9 @@ router.get('/getallusers', async (req, res) => {
   const users = await User.find();
   res.json(users);
 });
+
+//search user ID by phone number
+router.get('/search-user',passport.authenticate('jwt',{session:false}),requireRole('admin'),searchUsersById);
 
 
 module.exports = router;
