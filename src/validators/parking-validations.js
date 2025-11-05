@@ -24,17 +24,17 @@ const parkingSpotValidationSchema = checkSchema({
         in: ['body'],
         optional: true,
         isIn: {
-            options: [['available', 'occupied', 'reserved']],
-            errorMessage: 'Status must be one of "available", "occupied", "reserved"'
+            options: [['available', 'occupied']],
+            errorMessage: 'Status must be one of "available", "occupied"'
         }
     },
-    location: {
-        in: ['body'],
-        optional: true,
-        isString: {
-            errorMessage: 'Location must be a string'
-        }
-    }
+    // location: {
+    //     in: ['body'],
+    //     optional: true,
+    //     isString: {
+    //         errorMessage: 'Location must be a string'
+    //     }
+    // }
 });
 
 const parkingslotIdValidationSchema = checkSchema({

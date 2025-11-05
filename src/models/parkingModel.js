@@ -24,16 +24,16 @@ const parkingSlotSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Status is required'],
         enum: {
-            values: ["available", "occupied", "reserved"],
+            values: ["available", "occupied"],
             message: '{VALUE} is not a valid status.'
         },
         default: 'available'
     },
-    location: {
-        type: String,
-        required: [true, 'Location is required'],
-        trim: true
-    }
+    // location: {
+    //     type: String,
+    //     required: [true, 'Location is required'],
+    //     trim: true
+    // }
 });
  
 module.exports = mongoose.model('ParkingSlot', parkingSlotSchema);
