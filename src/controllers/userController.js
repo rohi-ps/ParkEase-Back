@@ -3,21 +3,22 @@ const { addToken } = require('../utils/tokenBlackList');
 const User = require('../models/Registeruser');
 const UserCred = require('../models/userCredentials');
 const bcrypt = require('bcrypt');
+const e = require('express');
 exports.register = async (req, res) => {
   const { email, firstName, lastName, password, phone } = req.body;
   const name = `${firstName} ${lastName}`;
   console.log('Incoming payload:', req.body);
 
-  const existingUser = await UserCred.findOne({ email });
+  const existingUser = await UserCred.findOne({ email:email.toLowerCase() });
   if (existingUser) {
     return res.status(409).json({ message: 'User already exists' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const login = new UserCred({ email, role: 'user', password: hashedPassword });
-  const registeredUser = new User({ name, email, phone, invoices: [] });
-  login.save();
-  registeredUser.save();
+  const login = new UserCred({ email:email.toLowerCase(), role: 'user', password: hashedPassword });
+  const registeredUser = new User({ name, email:email.toLowerCase(), phone, invoices: [] });
+  await login.save();
+  await registeredUser.save();
   res.status(201).json({ message: 'User registered successfully' });
 };
 
@@ -42,8 +43,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { email: credUser.email, role: credUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '15m' }
+      process.env.JWT_SECRET,{ expiresIn: '15m' }
     );
     console.log('JWT_SECRET:', process.env.JWT_SECRET);
     res.status(200).json({ message: 'Login successful', token, role: credUser.role, email: credUser.email, id: credUser._id });
