@@ -1,6 +1,6 @@
 const VehicleLog = require('../models/vehicleLog.model');
 const ParkingSlot = require('../models/parkingModel');
-const User = require('../models/user'); 
+const User = require('../models/Registeruser'); 
 
 // --- GET ALL LOGS (For Admin) ---
 const getAllLogs = async (req, res, next) => { 
