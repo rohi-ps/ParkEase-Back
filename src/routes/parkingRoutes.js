@@ -5,6 +5,7 @@ const router = express.Router();
 
 const {
   getAllParkingSpots,
+  getAvailableSlots,
   addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
@@ -18,6 +19,9 @@ const {
 
 // Get all parking spots
 router.get('/', getAllParkingSpots);
+
+// Get available parking spots
+router.get('/available-slots',getAvailableSlots);
 
 // Add new parking spot
 router.post('/', validateAddParkingSpot, addParkingSpot);

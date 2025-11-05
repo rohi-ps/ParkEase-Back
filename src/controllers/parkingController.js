@@ -3,6 +3,7 @@ const ParkingSlot = require('../models/parkingModel');
 
 // Get all parking spots
 const getAllParkingSpots = async (req, res) => {
+  
     const data1 = await ParkingSlot.find();
     res.status(200).json({
       status: 'success',
@@ -10,6 +11,16 @@ const getAllParkingSpots = async (req, res) => {
       data: data1
     });
 };
+
+const getAvailableSlots=async(req,res)=>{
+  try {
+      const slots =await ParkingSlot.find({status:"available"}).select('_id slotName vehicleType');
+      res.status(200).json(slots);
+  } catch (error) {
+    next(error);
+  }
+
+}
 
 // Add new parking spot
 const addParkingSpot = async (req, res) => {
@@ -84,6 +95,7 @@ const deleteParkingSpot = async (req, res) => {
 
 module.exports = {
   getAllParkingSpots,
+  getAvailableSlots,
   addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
