@@ -1,13 +1,13 @@
 const { checkSchema } = require('express-validator');
 
 const parkingSpotValidationSchema = checkSchema({
-    slotId: {
+    slotName: {
         in: ['body'],
         isString: {
-            errorMessage: 'Slot ID must be a string'
+            errorMessage: 'Slot Name must be a string'
         },
         notEmpty: {
-            errorMessage: 'Slot ID is required'
+            errorMessage: 'Slot Name is required'
         }
     },
     vehicleType: {
@@ -41,7 +41,7 @@ const parkingslotIdValidationSchema = checkSchema({
     id: {
         in: ['params'],
         isString: {
-            errorMessage: 'Slot ID must be a string'
+            errorMessage: 'Slot Name must be a string'
         },
         notEmpty: {
             errorMessage: 'Slot ID is required'
@@ -55,3 +55,4 @@ module.exports = {
     parkingSpotValidationSchema,
     parkingslotIdValidationSchema
 };
+

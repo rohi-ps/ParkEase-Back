@@ -2,28 +2,30 @@ const express = require('express');
 const { 
     getAllLogs,
     createLog,
-    getLogById,
-    exitVehicle 
+    exitVehicleByNumber, 
+    getMyVehicleLogs    
 } = require('../controllers/vehicleLogController.js'); 
 
 const { requireRole } = require('../middleware/jwt.js'); 
-const {validateCreateLogRequest, validateIdParameter}=require('../middleware/vehiclelogValidationMiddleware.js')
+
+const {validateCreateLogRequest} = require('../middleware/vehiclelogValidationMiddleware.js');
+
 const router = express.Router();
 
-
 // --- Admin-Only Routes ---
-// GET all logs and POST a new log are restricted to 'admin'.
+// GET all logs and POST a new log (vehicle entry)
 router.route('/')
     .get(requireRole('admin'), getAllLogs)   
-    .post(requireRole('admin'), validateCreateLogRequest, createLog);  
+    .post(requireRole('admin'), validateCreateLogRequest, createLog); 
 
-// --- Route Accessible by Authenticated Users (Admin OR User) ---
-// GET a single log by its ID
-router.route('/:id').get(validateIdParameter,getLogById); 
+// --- User-Only Route ---
+// GET all logs associated with the currently logged-in user
+router.route('/my-logs')
+    .get(requireRole('user'), getMyVehicleLogs);
 
 // --- Admin-Only Action Route ---
-router.route('/:id/exit')
-    .patch(requireRole('admin'), validateIdParameter, exitVehicle); 
+// POST to exit a vehicle based on its number (from req.body)
+router.route('/exit')
+    .post(requireRole('admin'), exitVehicleByNumber); 
 
 module.exports = router;
-
