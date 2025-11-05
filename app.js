@@ -15,7 +15,9 @@ app.use(passport.initialize());
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: 'http://localhost:4200' 
+})); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
 

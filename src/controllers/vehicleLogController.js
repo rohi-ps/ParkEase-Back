@@ -1,139 +1,143 @@
-const fs = require('fs').promises;
-const path = require('path');
+const VehicleLog = require('../models/vehicleLog.model');
+const ParkingSlot = require('../models/parkingModel');
+const User = require('../models/user'); 
 
-// Construct the absolute path to your data file relative to the current file
-const dataPath = path.join(__dirname, '../data/parkingData.json');
-
-// --- Helper Functions to Read/Write JSON Data ---
-
-const readData = async () => {
-    try {
-        // Check if the file exists before trying to read
-        await fs.access(dataPath); // Throws error if file doesn't exist
-        const jsonData = await fs.readFile(dataPath, 'utf8');
-        if (!jsonData.trim()) {
-            return [];
-        }
-        // Parse JSON and revive Date objects
-        return JSON.parse(jsonData, (key, value) => {
-            // Check if the key corresponds to a date field and the value is not null
-            if ((key === 'entryTime' || key === 'exitTime') && value) {
-                return new Date(value); // Convert string back to Date object
-            }
-            return value;
-        });
-    } catch (error) {
-            if (error.code === 'ENOENT') {
-            console.log('Data file not found');
-            return [];
-        }
-        console.error("Error reading data file:", error);
-    }
-};
-
-const writeData = async (data) => {
-    try {
-        const jsonString = JSON.stringify(data, null, 2); // Use 2 spaces for pretty-printing
-        await fs.writeFile(dataPath, jsonString, 'utf8');
-    } catch (error) {
-        console.error("Error writing data file:", error);
-    }
-};
-
-// --- Controller Methods ---
-
+// --- GET ALL LOGS (For Admin) ---
 const getAllLogs = async (req, res, next) => { 
     try {
-        const logs = await readData();
+        const logs = await VehicleLog.find({})
+            // We select which fields to return: 'slotName'
+            .populate('slotId', 'slotName') 
+            .sort({ entryTime: -1 }); // Show newest first
+        
         res.status(200).json(logs);
     } catch (error) {
-        res.status(500).json({ message: error.message || "Error while fetching parking logs." });
+        next(error); 
     }
 };
 
-const getLogById = async (req, res, next) => {
-    try {
-        const logs = await readData();
-        const logId = parseInt(req.params.id);
-        const log = logs.find(l => l.id === logId);
-
-        if (!log) {
-            // Use 404 for resource not found
-            return res.status(404).json({ message: 'Parking log not found.' });
-        }
-        res.status(200).json(log);
-    } catch (error) {
-        
-        res.status(500).json({ message: error.message || "Error while fetching parking log." });
-    }
-};
-
+// --- CREATE NEW LOG (Vehicle Enters) ---
 const createLog = async (req, res, next) => {
-    const { vehicleNumber, customerName, vehicleType, slotId } = req.body;
+    
+    // Note: 'slotId' here is expected to be the slotName, like "A-01"
+    const { vehicleNumber, vehicleType, slotId, userId } = req.body;
 
     try {
-        const logs = await readData();
-        
-        // --- Check for existing parked vehicle 
-        const existingParked = logs.find(log => log.vehicleNumber === vehicleNumber && log.status === 'Parked');
+        // 1. Check if vehicle is already parked
+        // This query now works because the 'status' field exists
+        const existingParked = await VehicleLog.findOne({ vehicleNumber, status: 'Parked' });
         if (existingParked) {
-             return res.status(409).json({ message: `Vehicle ${vehicleNumber} is already parked in slot ${existingParked.slotId}.` });
+             return res.status(409).json({ message: `Vehicle ${vehicleNumber} is already parked.` });
         }
-        // Simple auto-incrementing ID based on the current highest ID
-        const nextId = logs.length > 0 ? Math.max(0, ...logs.map(l => l.id)) + 1 : 1;
-
-        const newLog = {
-            id: nextId,
-            vehicleNumber,
-            customerName,
-            vehicleType,
-            slotId,
-            entryTime: new Date(), // Use current server time
-            exitTime: null,
-            status: 'Parked'
-        };
-
-        logs.push(newLog);
-        await writeData(logs); 
         
+        // 2. Find the slot in the database by its NAME
+        const slot = await ParkingSlot.findOne({ slotName: slotId });
+        if (!slot) {
+            return res.status(404).json({ message: `Slot ${slotId} not found.` });
+        }
+        if (slot.status !== 'available') {
+             return res.status(409).json({ message: `Slot ${slot.slotName} is not available.` });
+        }
+        
+        // 3. Check if vehicle type fits the slot
+        if (vehicleType === '4W' && slot.vehicleType === '2W') {
+            return res.status(400).json({ 
+                message: `Cannot park a 4-Wheeler in a 2-Wheeler slot (${slot.slotName}).` 
+            });
+        }
+        
+        // 4. Create the new log
+        const newLog = await VehicleLog.create({
+            vehicleNumber,
+            vehicleType,
+            slotId: slot._id,   // Use the actual ObjectId of the found slot
+            userId: userId,     // Store the customer's ObjectId (or null)
+            // 'entryTime' and 'status' are handled by schema defaults
+        });
+        
+        // 5. Update the slot's status
+        slot.status = 'occupied';
+        await slot.save();
+
         res.status(201).json(newLog); 
     } catch (error) {
-        res.status(500).json({ message: error.message || "Error while creating parking log." });
+         if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+         }
+        next(error);
     }
 };
 
-const exitVehicle = async (req, res, next) => {
+// --- COMPLETE LOG (Vehicle Exits) ---
+const exitVehicleByNumber = async (req, res, next) => {
+    const { vehicleNumber } = req.body;
+
+    if (!vehicleNumber) {
+        return res.status(400).json({ message: 'Vehicle number is required.' });
+    }
+
     try {
-        const logs = await readData();
-        const logId = parseInt(req.params.id); 
-        const logIndex = logs.findIndex(l => l.id === logId);
+        // 1. Find the *one* log for this vehicle that is currently 'Parked'
+        // This query also works correctly now
+        const logToUpdate = await VehicleLog.findOne({
+            vehicleNumber: vehicleNumber,
+            status: 'Parked'
+        });
 
-        if (logIndex === -1) {
-            return res.status(404).json({ message: 'Parking log not found.' });
+        // 2. Check if we found a log
+        if (!logToUpdate) {
+            return res.status(404).json({ message: `No 'Parked' vehicle found with number ${vehicleNumber}.` });
         }
         
-        const logToUpdate = logs[logIndex]; // Get a reference to the log
-
-        if (logToUpdate.status === 'Completed') {
-            return res.status(400).json({ message: 'Vehicle has already exited.' });
-        }
-
-        // Update the log properties
-        logToUpdate.status = 'Completed';
-        logToUpdate.exitTime = new Date(); // Set current server time as exit time
+        // 3. Update the log properties
+        logToUpdate.status = 'Completed'; // This line now works
+        logToUpdate.exitTime = new Date();
+        const updatedLog = await logToUpdate.save();
         
-        // Save the entire updated log array back to the file
-        await writeData(logs);
-        res.status(200).json(logToUpdate); // Respond with the updated log
+        // 4. Update the slot's status back to 'available'
+        await ParkingSlot.findByIdAndUpdate(logToUpdate.slotId, {
+            status: 'available'
+        });
+
+        res.status(200).json(updatedLog); 
     } catch (error) {
-        res.status(500).json({ message: error.message || "Error while processing vehicle exit." });
+        next(error);
     }
 };
+
+// --- GET LOGS FOR LOGGED-IN USER ---
+const getMyVehicleLogs = async (req, res, next) => {
+    try {
+        // 1. Get the LOGGED IN *CUSTOMER'S* ID from the token
+        const customerUserId = req.user.id; 
+
+        // 2. Find the user in the database
+        const user = await User.findById(customerUserId);
+        if (!user) {
+            return res.status(401).json({ message: 'User not found.' });
+        }
+        
+        // 3. Find logs using the robust $or query
+        const logs = await VehicleLog.find({
+            $or: [
+                { userId: customerUserId }, // A) Find logs linked to their ID
+                { vehicleNumber: { $in: user.vehicleNumbers || [] } } // B) Find logs matching their cars
+            ]
+        })
+        .populate('slotId', 'slotName')
+        .sort({ entryTime: -1 }); 
+
+        res.status(200).json(logs);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 module.exports = {
     getAllLogs,
-    getLogById,
     createLog,
-    exitVehicle
+    exitVehicleByNumber,
+    getMyVehicleLogs
 };
-

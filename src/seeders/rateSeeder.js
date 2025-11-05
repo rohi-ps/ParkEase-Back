@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Rate = require('../models/rate');
-
 const defaultRates = [
   {
     vehicleType: '2W',
