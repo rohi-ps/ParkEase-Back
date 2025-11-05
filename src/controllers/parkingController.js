@@ -1,33 +1,51 @@
 const parkingSpots = require('../data/parkingData');
+const ParkingSlot = require('../models/parkingModel');
 
 // Get all parking spots
-const getAllParkingSpots = (req, res) => {
+const getAllParkingSpots = async (req, res) => {
+  
+    const data1 = await ParkingSlot.find();
     res.status(200).json({
       status: 'success',
-      data: parkingSpots
+      // data: parkingSpots
+      data: data1
     });
 };
 
+const getAvailableSlots=async(req,res)=>{
+  try {
+      const slots =await ParkingSlot.find({status:"available"}).select('_id slotName vehicleType');
+      res.status(200).json(slots);
+  } catch (error) {
+    next(error);
+  }
+
+}
+
 // Add new parking spot
-const addParkingSpot = (req, res) => {
-    const newSpot = {
-      slotId: req.body.slotId,
-      vehicleType: req.body.vehicleType,
-      status: req.body.status || 'available',
-      location: req.body.location || 'Not Specified',
-    };
-    parkingSpots.push(newSpot);
+const addParkingSpot = async (req, res) => {
+    const newSpot1 = await ParkingSlot.create({
+        slotName: req.body.slotName,
+        vehicleType: req.body.vehicleType,
+        status: req.body.status || 'available',
+        location: req.body.location || 'Not Specified',
+    });
+    
+
+    // parkingSpots.push(newSpot1);
     res.status(201).json({
       status: 'success',
-      data: newSpot
+      // data: newSpot
+      data: newSpot1
     });
 };
 
 // Get parking spot by ID
-const getParkingSpotById = (req, res) => {
+const getParkingSpotById = async (req, res) => {
     const spotId = req.params.id;
-    const spot = parkingSpots.find(spot => spot.slotId === spotId);
-    if (!spot) {
+    // const spot = await parkingSpots.find(spot => spot.slotName === spotId);
+    const spot1 = await ParkingSlot.findOne({ slotName: spotId });
+    if (!spot1) {
       return res.status(404).json({
         status: 'fail',
         message: 'Parking spot not found'
@@ -36,51 +54,48 @@ const getParkingSpotById = (req, res) => {
     }
     res.status(200).json({
       status: 'success',
-      data: spot
+      // data: spot
+      data: spot1
     });
   
 };
 
 // Update parking spot status
-const updateParkingSpotStatus = (req, res) => {
+const updateParkingSpotStatus = async (req, res) => {
     const spotId = req.params.id;
-    const spotIndex = parkingSpots.findIndex(spot => spot.slotId === spotId);
-    if (spotIndex === -1) {
+    const updatedSpot = await ParkingSlot.findOneAndUpdate({ slotName: spotId },{ status: req.body.status }, { new: true });
+    if (!updatedSpot) {
       return res.status(404).json({
         status: 'fail',
         message: 'Parking spot not found'
       });
     }
-    parkingSpots[spotIndex] = {
-      ...parkingSpots[spotIndex],
-      status: req.body.status || parkingSpots[spotIndex].status
-    };
 
     res.status(200).json({
       status: 'success',
-      data: parkingSpots[spotIndex]
+      data: await ParkingSlot.findOne({ slotName : spotId })
     });
 };
 
-const deleteParkingSpot = (req, res) => {
+const deleteParkingSpot = async (req, res) => {
     const spotId = req.params.id;
-    const spotIndex = parkingSpots.findIndex(spot => spot.slotId === spotId);
-    if (spotIndex === -1) {
+    const deletedSpot = await ParkingSlot.findOneAndDelete({ slotName: spotId });
+    if (!deletedSpot) {
       return res.status(404).json({
         status: 'fail',
         message: 'Parking spot not found'
       });
     }
-    parkingSpots.splice(spotIndex, 1);
     res.status(204).json({
       status: 'success',
-      data: null
+      data: "Parking spot deleted successfully"
     });
   } 
 
 
 module.exports = {
   getAllParkingSpots,
+  getAvailableSlots,
   addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,

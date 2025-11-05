@@ -4,32 +4,30 @@ const app = require("../app");
 const { expect } = chai;
 
 const BASE = "/api/v1/billing";
-let authToken;
+let userToken;
+let adminToken;
 let testInvoiceId;
 
 describe("Billing Routes", () => {
   before(async () => {
-    // Register test user
-    // try {
-    //   await request(app).post("/api/register").send({
-    //     email: "test@example.com",
-    //     firstname: "Test",
-    //     lastname: "User",
-    //     password: "test123",
-    //     confirmPassword: "test123",
-    //   });
-    // } catch (error) {
-    //   // Ignore if user already exists
-    // }
-
-    // Login to get token
-    const loginRes = await request(app).post("/api/login").send({
-      email: "vuddangisaivenkatadurgaprasad@gmail.com",
-      password: "Durgaprasad@123",
+    // Login as regular user
+    const userLoginRes = await request(app).post("/api/login").send({
+      email: "user@example.com",
+      password: "user123",
     });
-    authToken = loginRes.body.token;
-    if (!authToken) {
-      throw new Error("Failed to get authentication token");
+    userToken = userLoginRes.body.token;
+    if (!userToken) {
+      throw new Error("Failed to get user authentication token");
+    }
+
+    // Login as admin
+    const adminLoginRes = await request(app).post("/api/login").send({
+      email: "admin@example.com",
+      password: "admin123",
+    });
+    adminToken = adminLoginRes.body.token;
+    if (!adminToken) {
+      throw new Error("Failed to get admin authentication token");
     }
   });
 

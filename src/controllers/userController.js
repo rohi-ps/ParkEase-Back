@@ -52,7 +52,29 @@ exports.login = async (req, res) => {
   }
 };
 
+
 exports.logout = (req, res) => {
   addToken(req.headers.authorization?.split(' ')[1]);
   res.json({ message: 'Logout successful' });
+};
+
+exports.searchUsersById = async (req, res, next) => {
+    try {
+        const { phone } = req.query;
+        if (!phone || phone.length < 3) {
+            return res.status(200).json([]);
+        }
+
+        // Create a case-insensitive regular expression
+        // This will find any user whose phone number *contains* the query string
+        const phoneRegex = new RegExp(phone, 'i');
+
+        const users = await User.find({ phone: phoneRegex })
+            .select('_id name') // Select only the fields needed by the frontend
+            .limit(2); // Limit results to avoid sending too much data
+
+        res.status(200).json(users);
+    } catch (error) {
+        next(error);
+    }
 };

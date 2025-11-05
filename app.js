@@ -15,7 +15,9 @@ app.use(passport.initialize());
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Logging
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: 'http://localhost:4200' 
+})); // Enable CORS
 app.use(express.json()); // Body parser
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,14 +31,14 @@ const routes = require('./src/routes/userRoutes');
 const parkingRoutes = require('./src/routes/parkingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
 const reservationRoutes = require('./src/routes/reservationRoutes');
-const logRoutes=require('./src/routes/vehicleLogRoutes');
+const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
 app.use('/api', routes);
 app.use('/api/v1/parking-spots', parkingRoutes);
 app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/reservations', reservationRoutes);
-app.use('/api/logs', logRoutes);
+app.use('/api/logs', vehicleLogRoutes);
 // Error handling
 app.use((req, res, next) => {
   const error = new Error('Not Found');
@@ -49,3 +51,10 @@ app.use(errorHandler);
 
 module.exports = app;
  
+
+//TODO:Add role based aythentication middleware
+//TODO:Implement role-based access control
+//TODO:Secure Sensitive points via jwt 
+//TODO:Proper relation within schemas 
+//TODO:Host once done
+//TODO:Make sure all modules use database connectivity instead of file system
