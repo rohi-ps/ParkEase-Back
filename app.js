@@ -35,9 +35,9 @@ const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
 app.use('/api', routes);
-app.use('/api/v1/parking-spots', parkingRoutes);
-app.use('/api/v1/billing', billingRoutes);
-app.use('/api/v1/reservations', reservationRoutes);
+app.use('/api/parking-spots', parkingRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/reservations', reservationRoutes);
 app.use('/api/logs', vehicleLogRoutes);
 // Error handling
 app.use((req, res, next) => {
@@ -52,9 +52,3 @@ app.use(errorHandler);
 module.exports = app;
  
 
-//TODO:Add role based aythentication middleware
-//TODO:Implement role-based access control
-//TODO:Secure Sensitive points via jwt 
-//TODO:Proper relation within schemas 
-//TODO:Host once done
-//TODO:Make sure all modules use database connectivity instead of file system
