@@ -16,13 +16,11 @@ async function calculateParkingCharges(vehicleType, checkInTime, checkOutTime) {
 
   const duration = calculateDuration(checkInTime, checkOutTime);
   const additionalHours = Math.max(0, duration - 1);
-  const totalAmount = rate.baseRate + (additionalHours * rate.additionalHourRate);
-
   return {
     duration,
     baseRate: rate.baseRate,
     additionalHourRate: rate.additionalHourRate,
-    totalAmount
+    totalAmount: rate.baseRate + (additionalHours * rate.additionalHourRate)
   };
 }
 

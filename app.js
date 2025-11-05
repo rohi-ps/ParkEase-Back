@@ -51,3 +51,10 @@ app.use(errorHandler);
 
 module.exports = app;
  
+
+//TODO:Add role based aythentication middleware
+//TODO:Implement role-based access control
+//TODO:Secure Sensitive points via jwt 
+//TODO:Proper relation within schemas 
+//TODO:Host once done
+//TODO:Make sure all modules use database connectivity instead of file system

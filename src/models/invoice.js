@@ -12,7 +12,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   vehicleType: {
     type: String,
-    enum: ['2W', '4W'],
     required: true
   },
   checkInTime: {
@@ -23,14 +22,9 @@ const invoiceSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  amount: {
-    type: Number,
-    required: true,
-    min: 0
-  },
   paymentMethod: {
     type: String,
-    enum: ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet'],
+    enum: ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet', null],
     default: null
   },
   status: {
@@ -42,12 +36,7 @@ const invoiceSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
-  duration: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  breakdown: {
+  totalAmount: {
     baseRate: {
       type: Number,
       required: true
@@ -69,6 +58,7 @@ const invoiceSchema = new mongoose.Schema({
 invoiceSchema.index({ userId: 1 });
 invoiceSchema.index({ status: 1 });
 invoiceSchema.index({ parkingSpotId: 1 });
+invoiceSchema.index({ paidAt: 1 });
 
 // Methods for payment processing
 invoiceSchema.methods.processPayment = async function(paymentMethod) {

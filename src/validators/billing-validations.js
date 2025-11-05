@@ -51,11 +51,12 @@ exports.processPaymentValidators = [
     .isString().withMessage('Invoice ID must be a string'),
 
   body('paymentMethod')
-    .notEmpty().withMessage('Payment method is required')
-    .isIn(['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet'])
+    .custom(value => {
+      const allowedMethods = ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet'];
+      return value === null || allowedMethods.includes(value);
+    })
     .withMessage('Invalid payment method')
 ];
-
 exports.getInvoiceValidators = [
   param('id')
     .notEmpty().withMessage('Invoice ID is required')
