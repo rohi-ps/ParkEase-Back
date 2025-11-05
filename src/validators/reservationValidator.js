@@ -1,64 +1,91 @@
-const Joi = require('joi');
+const { body } = require('express-validator');
 
-const reservationSchema = Joi.object({
-  slotID: Joi.string().required(),
+const isValidVehicleNumber = value => {
+  const regex = /^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/;
+  if (!regex.test(value)) {
+    throw new Error('Invalid vehicle number format. Use TN01AB5678');
+  }
+  return true;
+};
 
-  VehicleType: Joi.string()
-    .valid('2W', '4W')
-    .required(),
+const isValidDate = value => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(value)) {
+    throw new Error('Date must be in YYYY-MM-DD format');
+  }
+  return true;
+};
 
-  vehicleNumber: Joi.string()
-    .pattern(/^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Invalid vehicle number format. Use TN01AB5678'
-    }),
+const isValidTime = value => {
+  const regex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
+  if (!regex.test(value)) {
+    throw new Error('Time must be in HH:mm format');
+  }
+  return true;
+};
 
-  EntryDate: Joi.string()
-    .pattern(/^\d{4}-\d{2}-\d{2}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'EntryDate must be in YYYY-MM-DD format'
-    }),
-
-  EntryTime: Joi.string()
-    .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'EntryTime must be in HH:mm format'
-    }),
-
-  ExitDate: Joi.string()
-    .pattern(/^\d{4}-\d{2}-\d{2}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'ExitDate must be in YYYY-MM-DD format'
-    }),
-
-  ExitTime: Joi.string()
-    .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'ExitTime must be in HH:mm format'
-    })
-});
-
-const validateReservation = (data) => {
-  const { error } = reservationSchema.validate(data);
-  if (error) return error.details[0].message;
-
-  const entry = new Date(`${data.EntryDate}T${data.EntryTime}`);
-  const exit = new Date(`${data.ExitDate}T${data.ExitTime}`);
+const validateEntryExitLogic = body().custom((value) => {
+  const entry = new Date(`${value.entryDate}T${value.entryTime}`);
+  const exit = new Date(`${value.exitDate}T${value.exitTime}`);
 
   if (exit.getTime() <= entry.getTime()) {
-    if (data.ExitDate < data.EntryDate) {
-      return 'Exit date must be after entry date';
-    } else if (data.ExitDate === data.EntryDate && data.ExitTime <= data.EntryTime) {
-      return 'Exit time must be after entry time on the same day';
+    if (value.exitDate < value.entryDate) {
+      throw new Error('Exit date must be after entry date');
+    } else if (value.exitDate === value.entryDate && value.exitTime <= value.entryTime) {
+      throw new Error('Exit time must be after entry time on the same day');
     }
   }
 
-  return null;
-};
+  return true;
+});
 
-module.exports = { validateReservation };
+exports.reservationValidators = [
+  body('slotId')
+    .notEmpty().withMessage('slotId is required'),
+
+  body('vehicleType')
+    .notEmpty().withMessage('vehicleType is required'),
+
+  body('vehicleNumber')
+    .notEmpty().withMessage('vehicleNumber is required')
+    .custom(isValidVehicleNumber),
+
+  body('entryDate')
+    .notEmpty().withMessage('entryDate is required')
+    .custom(isValidDate),
+
+  body('entryTime')
+    .notEmpty().withMessage('entryTime is required')
+    .custom(isValidTime),
+
+  body('exitDate')
+    .notEmpty().withMessage('exitDate is required')
+    .custom(isValidDate),
+
+  body('exitTime')
+    .notEmpty().withMessage('exitTime is required')
+    .custom(isValidTime),
+
+  validateEntryExitLogic
+];
+
+exports.updateReservationValidators = [
+  body('entryDate')
+    .notEmpty().withMessage('entryDate is required')
+    .custom(isValidDate),
+
+  body('entryTime')
+    .notEmpty().withMessage('entryTime is required')
+    .custom(isValidTime),
+
+  body('exitDate')
+    .notEmpty().withMessage('exitDate is required')
+    .custom(isValidDate),
+
+  body('exitTime')
+    .notEmpty().withMessage('exitTime is required')
+    .custom(isValidTime),
+
+  validateEntryExitLogic
+];
+
