@@ -13,8 +13,7 @@ const reservationSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
-    default: null
+    ref: "user"
   },
   vehicleNumber: {
     type: String,
