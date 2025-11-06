@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Invoice = require('../models/invoice');
 const Rate = require('../models/rate');
 const { calculateParkingCharges, PAYMENT_METHODS } = require('../utils/billingUtils');
@@ -7,17 +8,30 @@ const getAllInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find()
       .sort({ createdAt: -1 }) // Sort by latest first
-      .populate('userId', 'email name'); // Populate user details if needed
+      .populate({
+        path: 'userId',
+        model: 'user',
+        select: 'name email'
+      });
     
+    if (!invoices) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No invoices found'
+      });
+    }
+
     res.status(200).json({
       status: 'success',
       results: invoices.length,
       data: invoices
     });
   } catch (error) {
+    console.error('Error in getAllInvoices:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Error fetching invoices'
+      message: 'Error fetching invoices',
+      error: error.message
     });
   }
 };
@@ -25,8 +39,21 @@ const getAllInvoices = async (req, res) => {
 // Get invoice by ID
 const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findOne({ invoiceId: req.params.id })
-      .populate('userId', 'email name');
+    // Authorization should be handled by middleware
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid invoice ID format'
+      });
+    }
+
+    const invoice = await Invoice.findById(req.params.id)
+      .populate({
+        path: 'userId',
+        model: 'user',
+        select: 'name email'
+      })
+      .lean();  // Convert to plain JavaScript object
 
     if (!invoice) {
       return res.status(404).json({
@@ -40,9 +67,11 @@ const getInvoiceById = async (req, res) => {
       data: invoice
     });
   } catch (error) {
+    console.error('Error in getInvoiceById:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Error fetching invoice'
+      message: 'Error fetching invoice',
+      error: error.message
     });
   }
 };
@@ -96,7 +125,14 @@ const processPayment = async (req, res) => {
     const { paymentMethod } = req.body;
     const invoiceId = req.params.id;
 
-    const invoice = await Invoice.findOne({ invoiceId });
+    if (!PAYMENT_METHODS.includes(paymentMethod)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid payment method'
+      });
+    }
+
+    const invoice = await Invoice.findById(invoiceId);
 
     if (!invoice) {
       return res.status(404).json({
@@ -113,8 +149,11 @@ const processPayment = async (req, res) => {
       });
     }
 
-    // Process payment using the model method
-    const updatedInvoice = await invoice.processPayment(paymentMethod);
+    // Update invoice with payment details
+    invoice.paymentMethod = paymentMethod;
+    invoice.status = 'paid';
+    invoice.paymentDate = new Date();
+    const updatedInvoice = await invoice.save();
 
     res.status(200).json({
       status: 'success',
@@ -137,11 +176,21 @@ const processPayment = async (req, res) => {
 // Get available payment methods
 const getPaymentMethods = async (req, res) => {
   try {
+    // Authorization should be handled by middleware
+    if (!PAYMENT_METHODS || PAYMENT_METHODS.length === 0) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No payment methods available'
+      });
+    }
+
     res.status(200).json({
       status: 'success',
+      count: PAYMENT_METHODS.length,
       data: PAYMENT_METHODS
     });
   } catch (error) {
+    console.error('Error in getPaymentMethods:', error);
     res.status(500).json({
       status: 'error',
       message: 'Error fetching payment methods'

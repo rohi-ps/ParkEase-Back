@@ -1,7 +1,6 @@
 const Reservation = require('../models/reservationModel');
 const ParkingSlot = require('../models/parkingModel');
 
-
 exports.createReservation = async (req, res) => {
   try {
     const { slotId } = req.body;
@@ -38,6 +37,7 @@ exports.createReservation = async (req, res) => {
 // Update reservation 
 exports.updateReservation = async (req, res) => {
   try {
+    const { slotId } = req.params;
     const { entryDate, entryTime, exitDate, exitTime } = req.body;
 
     const updated = await Reservation.findOneAndUpdate(
@@ -94,10 +94,10 @@ exports.deleteReservation = async (req, res) => {
   }
 };
 
-// Get all reservations
 exports.allusers = async (req, res) => {
   try {
-    const reservations = await Reservation.find().populate('slotId userId');
+    const reservations = await Reservation.find()
+
     res.status(200).json(reservations);
   } catch (err) {
     res.status(500).json({ error: err.message });

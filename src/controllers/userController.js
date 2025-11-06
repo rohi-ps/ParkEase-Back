@@ -21,6 +21,24 @@ exports.register = async (req, res) => {
   res.status(201).json({ message: "User registered successfully" });
 };
 
+exports.registerAdmin = async (req, res) => {
+  const { email, firstName, lastName, password, phone } = req.body;
+  const name = `${firstName} ${lastName}`;
+  console.log('Incoming payload:', req.body);
+
+  const existingUser = await UserCred.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({ message: 'Admin already exists' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const login = new UserCred({ email, role: 'admin', password: hashedPassword });
+  const registeredUser = new User({ name, email, phone, invoices: [] });
+  login.save();
+  registeredUser.save();
+  res.status(201).json({ message: 'Admin registered successfully' });
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
