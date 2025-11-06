@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('../config/passportconfig');
-const { register, login, logout, searchUsersById } = require('../controllers/userController');
+const { register, login, logout, searchUsersById,registerAdmin } = require('../controllers/userController');
 const { requireRole } = require('../middleware/jwt');
 const { registerValidators, loginValidators } = require('../validators/user-validations');
 const { validationResult } = require('express-validator');
@@ -12,7 +12,11 @@ router.post('/register', registerValidators, async (req, res) => {
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   await register(req, res);
 });
-
+router.post('/register/admin', registerValidators, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  await registerAdmin(req, res);
+});
 router.post('/login', loginValidators, (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });

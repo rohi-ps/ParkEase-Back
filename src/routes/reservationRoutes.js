@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { validationResult } = require('express-validator');
 
-const {createReservation,updateReservation,deleteReservation,allusers} = require('../controllers/reservationController');
+const {createReservation,updateReservation,deleteReservation,allusers,getMyReservations,getReservationByUserId} = require('../controllers/reservationController');
 
 const { reservationValidators, updateReservationValidators } = require('../validators/reservationValidator');
+
 
 router.post('/create', reservationValidators, async (req, res) => {
   const errors = validationResult(req);
@@ -19,6 +20,9 @@ router.put('/update/:slotId', updateReservationValidators, async (req, res) => {
 });
 
 router.delete('/delete/:slotId', deleteReservation);
+
+// router.get('/getallByUser/:userId', getMyReservations);
+// router.get('/getallByUser/:userId', getReservationByUserId);
 
 router.get('/getall', allusers);
 

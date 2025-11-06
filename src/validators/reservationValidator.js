@@ -71,21 +71,20 @@ exports.reservationValidators = [
 
 exports.updateReservationValidators = [
   body('entryDate')
-    .notEmpty().withMessage('entryDate is required')
+    .optional()
     .custom(isValidDate),
 
   body('entryTime')
-    .notEmpty().withMessage('entryTime is required')
+    .optional()
     .custom(isValidTime),
 
   body('exitDate')
-    .notEmpty().withMessage('exitDate is required')
+    .optional()
     .custom(isValidDate),
 
   body('exitTime')
-    .notEmpty().withMessage('exitTime is required')
+    .optional()
     .custom(isValidTime),
 
   validateEntryExitLogic
 ];
-
