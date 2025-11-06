@@ -74,6 +74,7 @@ router.get('/rates',
   getRates
 );
 
+//Create rates
 router.post('/rates',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
@@ -82,6 +83,7 @@ router.post('/rates',
   createRate
 );
 
+// Update rates
 router.put('/rates/:vehicleType',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
