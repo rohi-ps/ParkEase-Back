@@ -35,7 +35,7 @@ const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
 app.use('/api', routes);
-app.use('/api/v1/parking-spots', parkingRoutes);
+app.use('/api/parking-spots', parkingRoutes);
 app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/reservations', reservationRoutes);
 app.use('/api/logs', vehicleLogRoutes);

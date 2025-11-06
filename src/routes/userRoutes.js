@@ -45,7 +45,7 @@ router.get('/getallusers', async (req, res) => {
 });
 
 //search user ID by phone number
-router.get('/search-user',passport.authenticate('jwt',{session:false}),requireRole('admin'),searchUsersById);
+router.get('/search-user',searchUsersById);
 
 
 module.exports = router;
