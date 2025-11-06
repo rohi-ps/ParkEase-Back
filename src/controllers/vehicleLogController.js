@@ -31,7 +31,7 @@ const createLog = async (req, res, next) => {
         }
         
         // 2. Find the slot in the database by its NAME
-        const slot = await ParkingSlot.findOne({ slotName: slotId });
+        const slot = await ParkingSlot.findOne({ _id: slotId });
         if (!slot) {
             return res.status(404).json({ message: `Slot ${slotId} not found.` });
         }
@@ -50,8 +50,8 @@ const createLog = async (req, res, next) => {
         const newLog = await VehicleLog.create({
             vehicleNumber,
             vehicleType,
-            slotId: slot._id,   // Use the actual ObjectId of the found slot
-            userId: userId,     // Store the customer's ObjectId (or null)
+            slotId: slot._id,  
+            userId: userId,     
             // 'entryTime' and 'status' are handled by schema defaults
         });
         
@@ -71,7 +71,6 @@ const createLog = async (req, res, next) => {
 // --- COMPLETE LOG (Vehicle Exits) ---
 const exitVehicleByNumber = async (req, res, next) => {
     const { vehicleNumber } = req.body;
-
     if (!vehicleNumber) {
         return res.status(400).json({ message: 'Vehicle number is required.' });
     }
@@ -79,11 +78,7 @@ const exitVehicleByNumber = async (req, res, next) => {
     try {
         // 1. Find the *one* log for this vehicle that is currently 'Parked'
         // This query also works correctly now
-        const logToUpdate = await VehicleLog.findOne({
-            vehicleNumber: vehicleNumber,
-            status: 'Parked'
-        });
-
+        const logToUpdate = await VehicleLog.findOne({vehicleNumber});
         // 2. Check if we found a log
         if (!logToUpdate) {
             return res.status(404).json({ message: `No 'Parked' vehicle found with number ${vehicleNumber}.` });

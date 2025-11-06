@@ -21,14 +21,10 @@ const router = express.Router();
 router
   .route("/")
   .get(
-    passport.authenticate("jwt", { session: false }),
-    requireRole("admin"),
+    
     getAllLogs
   )
   .post(
-    passport.authenticate("jwt", { session: false }),
-    requireRole("admin"),
-    validateCreateLogRequest,
     createLog
   );
 
@@ -37,8 +33,7 @@ router
 router
   .route("/my-logs")
   .get(
-    passport.authenticate("jwt", { session: false }),
-    requireRole("user"),
+   
     getMyVehicleLogs
   );
 
@@ -46,9 +41,8 @@ router
 // POST to exit a vehicle based on its number (from req.body)
 router
   .route("/exit")
-  .post(
-    passport.authenticate("jwt", { session: false }),
-    requireRole("admin"),
+  .patch(
+    
     exitVehicleByNumber
   );
 
