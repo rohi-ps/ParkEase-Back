@@ -6,6 +6,7 @@ const { requireRole } = require('../middleware/jwt');
 const { registerValidators, loginValidators } = require('../validators/user-validations');
 const { validationResult } = require('express-validator');
 const User = require('../models/userCredentials');
+const checkBlacklist = require('../middleware/logoutmiddleware');
 router.post('/register', registerValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -19,12 +20,13 @@ router.post('/login', loginValidators, (req, res) => {
 });
 
 router.get('/profile',
+  checkBlacklist, // must run first
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    console.log('Authenticated user:', req.user);
-    res.json({ message: `Welcome ${req.user.email}` });
+    res.json({ message: `Welcome ${req.user.email}`, user: req.user });
   }
 );
+
 
 
 router.get('/admin',
@@ -34,11 +36,12 @@ router.get('/admin',
     res.json({ message: `Welcome Admin ${req.user.email}` });
   }
 );
-
 router.post('/logout',
+  checkBlacklist,
   passport.authenticate('jwt', { session: false }),
   logout
 );
+
 router.get('/getallusers', async (req, res) => {
   const users = await User.find();
   res.json(users);

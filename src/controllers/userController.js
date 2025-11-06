@@ -3,7 +3,6 @@ const { addToken } = require('../utils/tokenBlackList');
 const User = require('../models/Registeruser');
 const UserCred = require('../models/userCredentials');
 const bcrypt = require('bcrypt');
-const e = require('express');
 exports.register = async (req, res) => {
   const { email, firstName, lastName, password, phone } = req.body;
   const name = `${firstName} ${lastName}`;
@@ -54,7 +53,8 @@ exports.login = async (req, res) => {
 
 
 exports.logout = (req, res) => {
-  addToken(req.headers.authorization?.split(' ')[1]);
+  const token = req.headers.authorization?.split(' ')[1];
+  if (token) addToken(token);
   res.json({ message: 'Logout successful' });
 };
 
