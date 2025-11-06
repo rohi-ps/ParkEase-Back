@@ -125,7 +125,14 @@ const processPayment = async (req, res) => {
     const { paymentMethod } = req.body;
     const invoiceId = req.params.id;
 
-    const invoice = await Invoice.findOne({ invoiceId });
+    if (!PAYMENT_METHODS.includes(paymentMethod)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid payment method'
+      });
+    }
+
+    const invoice = await Invoice.findById(invoiceId);
 
     if (!invoice) {
       return res.status(404).json({
@@ -142,8 +149,11 @@ const processPayment = async (req, res) => {
       });
     }
 
-    // Process payment using the model method
-    const updatedInvoice = await invoice.processPayment(paymentMethod);
+    // Update invoice with payment details
+    invoice.paymentMethod = paymentMethod;
+    invoice.status = 'paid';
+    invoice.paymentDate = new Date();
+    const updatedInvoice = await invoice.save();
 
     res.status(200).json({
       status: 'success',

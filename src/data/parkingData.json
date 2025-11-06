@@ -5,9 +5,9 @@
     "customerName": "Test User 1",
     "vehicleType": "4W",
     "slotId": "A-01",
-    "entryTime": "2025-10-31T10:31:03.545Z",
-    "exitTime": "2025-10-31T11:31:04.020Z",
-    "status": "Completed"
+    "entryTime": "2025-11-06T05:34:04.911Z",
+    "exitTime": null,
+    "status": "Parked"
   },
   {
     "id": 2,
@@ -15,8 +15,8 @@
     "customerName": "Test User 2",
     "vehicleType": "2W",
     "slotId": "B-02",
-    "entryTime": "2025-10-31T09:31:03.546Z",
-    "exitTime": "2025-10-31T11:01:03.546Z",
+    "entryTime": "2025-11-06T04:34:04.912Z",
+    "exitTime": "2025-11-06T06:04:04.912Z",
     "status": "Completed"
   }
 ]
