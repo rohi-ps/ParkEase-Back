@@ -18,7 +18,7 @@ const reservationSchema = new mongoose.Schema({
   vehicleNumber: {
     type: String,
     required: [true, "Vehicle Number is required."],
-    match: /^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/
+    match: /^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/,
   },
   entryDate: {
     type: String,
@@ -59,8 +59,6 @@ reservationSchema.pre("validate", function (next) {
   if (this.entryDate === today && this.entryTime < currentTime) {
     return next(new Error("Entry time cannot be in the past."));
   }
-
-  // Check if exit is before or equal to entry
   if (exitDateTime <= entryDateTime) {
     return next(new Error("Exit time must be after entry time."));
   }
@@ -68,5 +66,16 @@ reservationSchema.pre("validate", function (next) {
   next();
 });
 
+// Partial unique index: prevent duplicate vehicleNumber for Active/Upcoming
+reservationSchema.index(
+  { vehicleNumber: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: { $in: ["Active", "Upcoming"] }
+    }
+  }
+);
+reservationSchema.index({ status: 1 });
 
 module.exports = mongoose.model("Reservation", reservationSchema);
