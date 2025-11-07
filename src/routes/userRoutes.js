@@ -36,8 +36,9 @@ router.get('/profile',
 router.get('/admin',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
-  (req, res) => {
-    res.json({ message: `Welcome Admin ${req.user.email}` });
+  async (req, res) => {
+    const admins = await User.find({ role: 'admin' });
+    res.json(admins);
   }
 );
 router.post('/logout',
@@ -47,7 +48,7 @@ router.post('/logout',
 );
 
 router.get('/getallusers', async (req, res) => {
-  const users = await User.find();
+  const users = await User.find({role:'user'});
   res.json(users);
 });
 
