@@ -40,8 +40,8 @@ router.get('/invoices',
 // Get specific invoice (authenticated user)
 router.get('/invoices/:id', 
   // passport.authenticate('jwt', { session: false }),
-  // getInvoiceValidators,
-  // validate,
+  getInvoiceValidators,
+  validate,
   getInvoiceById
 );
 
