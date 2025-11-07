@@ -8,7 +8,7 @@ const parkingSlotSchema = new mongoose.Schema({
         uppercase: true, // Optional: Force ID to be uppercase
         trim: true,
         match: [
-            /^[A-Z]\d{2}$/,
+            /^[A-Z]\d{1,2}$/,
             'Slot ID must be one letter followed by two digits (e.g., A01)'
         ]
     },
@@ -28,11 +28,6 @@ const parkingSlotSchema = new mongoose.Schema({
             message: '{VALUE} is not a valid status.'
         },
         default: 'available'
-    },
-    location: {
-        type: String,
-        required: [true, 'Location is required'],
-        trim: true
     }
 });
  
