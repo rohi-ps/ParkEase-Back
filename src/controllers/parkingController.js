@@ -28,7 +28,7 @@ const addParkingSpot = async (req, res) => {
         slotName: req.body.slotName,
         vehicleType: req.body.vehicleType,
         status: req.body.status || 'available',
-        location: req.body.location || 'Not Specified',
+        // location: req.body.location || 'Not Specified',
     });
     
 
