@@ -81,6 +81,24 @@ const generateInvoice = async (req, res) => {
   try {
     const { userId, parkingSpotId, vehicleType, checkInTime, checkOutTime } = req.body;
 
+    // Validate vehicle type
+    const validVehicleTypes = ['2W', '4W'];
+    if (!validVehicleTypes.includes(vehicleType)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid vehicle type. Must be either "2W" or "4W"'
+      });
+    }
+
+    // Check if rate exists for this vehicle type
+    const rate = await Rate.findOne({ vehicleType });
+    if (!rate) {
+      return res.status(400).json({
+        status: 'fail',
+        message: `No parking rate found for vehicle type: ${vehicleType}`
+      });
+    }
+
     // Calculate charges using billing utils
     const charges = await calculateParkingCharges(vehicleType, checkInTime, checkOutTime);
 
@@ -118,7 +136,6 @@ const generateInvoice = async (req, res) => {
     });
   }
 };
-
 // Process payment for an invoice
 const processPayment = async (req, res) => {
   try {
