@@ -14,9 +14,24 @@ let userId;
 
 describe("Billing Routes", () => {
   before(async () => {
-    // Clean up test users if they exist
+    // Clean up test data
     await UserCred.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
     await User.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
+    await Rate.deleteMany({}); // Clean up all rates
+    
+    // Create test rates
+    await Rate.create([
+      {
+        vehicleType: "2W",
+        baseRate: 30,
+        additionalHourRate: 20
+      },
+      {
+        vehicleType: "4W",
+        baseRate: 60,
+        additionalHourRate: 40
+      }
+    ]);
     
     // Register test user
     await request(app)
