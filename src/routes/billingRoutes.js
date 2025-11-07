@@ -3,6 +3,7 @@ const router = express.Router();
 const { validationResult } = require('express-validator');
 const passport = require('../config/passportconfig');
 const { requireRole } = require('../middleware/jwt');
+const authmiddleware = require('../middleware/logoutmiddleware');
 const {
   generateInvoiceValidators,
   processPaymentValidators,
@@ -32,14 +33,16 @@ const validate = (req, res, next) => {
 
 // Get all invoices (admin only)
 router.get('/invoices', 
-  // passport.authenticate('jwt', { session: false }),
-  // requireRole('admin'),
+  authmiddleware,
+  passport.authenticate('jwt', { session: false }),
+  requireRole('admin'),
   getAllInvoices
 );
 
 // Get specific invoice (authenticated user)
 router.get('/invoices/:id', 
-  // passport.authenticate('jwt', { session: false }),
+  authmiddleware,
+  passport.authenticate('jwt', { session: false }),
   getInvoiceValidators,
   validate,
   getInvoiceById

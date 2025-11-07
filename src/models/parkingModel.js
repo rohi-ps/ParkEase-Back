@@ -28,11 +28,6 @@ const parkingSlotSchema = new mongoose.Schema({
             message: '{VALUE} is not a valid status.'
         },
         default: 'available'
-    },
-    location: {
-        type: String,
-        required: [true, 'Location is required'],
-        trim: true
     }
 });
  
