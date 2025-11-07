@@ -78,7 +78,7 @@ const exitVehicleByNumber = async (req, res, next) => {
     try {
         // 1. Find the *one* log for this vehicle that is currently 'Parked'
         // This query also works correctly now
-        const logToUpdate = await VehicleLog.findOne({vehicleNumber});
+        const logToUpdate = await VehicleLog.findOne({vehicleNumber, status:'Parked'});
         // 2. Check if we found a log
         if (!logToUpdate) {
             return res.status(404).json({ message: `No 'Parked' vehicle found with number ${vehicleNumber}.` });
