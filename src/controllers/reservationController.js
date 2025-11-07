@@ -3,20 +3,39 @@ const ParkingSlot = require('../models/parkingModel');
 
 exports.createReservation = async (req, res) => {
   try {
-    const { slotId } = req.body;
+    const { slotId, vehicleNumber } = req.body;
 
     // Check if slot is already reserved
-    const exists = await Reservation.findOne({ slotId });
-    if (exists) {
-      return res.status(409).json({ message: "Slot already reserved" });
+    const slotExists = await Reservation.findOne({
+      slotId,
+      status: { $in: ["Active", "Upcoming"] }
+    });
+
+    if (slotExists) {
+      return res.status(409).json({
+        message: "This slot is already reserved for the selected time."
+      });
+    }
+
+    // Check if vehicle already has an active/upcoming reservation
+    const vehicleExists = await Reservation.findOne({
+      vehicleNumber,
+      status: { $in: ["Active", "Upcoming"] }
+    });
+
+    if (vehicleExists) {
+      return res.status(409).json({
+        message: "This vehicle already has an active or upcoming reservation."
+      });
     }
 
     // Create reservation
-    const newReservation = new Reservation(req.body);
+    const newReservation = new Reservation({...req.body,userId: req.user._id });
     await newReservation.save();
 
+    // Update slot status to occupied
     const updatedSlot = await ParkingSlot.findByIdAndUpdate(
-      slotId,
+      { slotName: slotId },
       { $set: { status: "occupied" } },
       { new: true }
     );
@@ -26,14 +45,20 @@ exports.createReservation = async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Reservation created successfully",
+      message: "Reservation created successfully.",
       data: newReservation
     });
   } catch (err) {
+    // Handle MongoDB duplicate key error
+    if (err.code === 11000) {
+      return res.status(409).json({
+        message: "Duplicate reservation detected. Vehicle already reserved."
+      });
+    }
+
     res.status(500).json({ error: err.message });
   }
 };
-
 // Update reservation 
 exports.updateReservation = async (req, res) => {
   try {
@@ -77,9 +102,8 @@ exports.deleteReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    
     const updatedSlot = await ParkingSlot.findByIdAndUpdate(
-      slotId,
+      { slotName: slotId },
       { $set: { status: "available" } },
       { new: true }
     );
@@ -93,6 +117,23 @@ exports.deleteReservation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getReservationByUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const reservations = await Reservation.find({ userId });
+
+    if (!reservations || reservations.length === 0) {
+      return res.status(404).json({ message: 'No reservations found for this user' });
+    }
+
+    res.status(200).json({ data: reservations });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 exports.allusers = async (req, res) => {
   try {
