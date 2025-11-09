@@ -25,7 +25,10 @@ router.get('/',
 );
 
 // Get available parking spots
-
+router.get('/available-slots', 
+  passport.authenticate('jwt', { session: false }),
+  getAvailableSlots
+);
 
 // Add new parking spot
 router.post('/', 
