@@ -4,6 +4,11 @@ const { validationResult } = require('express-validator');
 const passport = require('../config/passportconfig');
 const { requireRole } = require('../middleware/jwt');
 const {
+    getRates,
+    createRate,
+    updateRate
+} = require('../controllers/rateController');
+const {
     createRateValidators,
     updateRateValidators
 } = require('../validators/rate-validations');
@@ -18,13 +23,13 @@ const validate = (req, res, next) => {
   next();
 };
 // Rate management routes
-router.get('/rates',
+router.get('/',
   passport.authenticate('jwt', { session: false }),
   getRates
 );
 
 //Create rates
-router.post('/rates',
+router.post('/',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
   createRateValidators,
@@ -33,7 +38,7 @@ router.post('/rates',
 );
 
 // Update rates
-router.put('/rates/:vehicleType',
+router.put('/:vehicleType',
   passport.authenticate('jwt', { session: false }),
   requireRole('admin'),
   updateRateValidators,
