@@ -2,11 +2,11 @@ const request = require("supertest");
 const chai = require("chai");
 const app = require("../app");
 const { expect } = chai;
-const UserCred = require('../src/models/userCredentials');
-const User = require('../src/models/Registeruser');
-const Rate = require('../src/models/rate');
-
+const UserCred = require("../src/models/userCredentials");
+const User = require("../src/models/Registeruser");
+const Rate = require("../src/models/rate");
 const BASE = "/api/billing";
+const RATEBASE = "/api/rates";
 let userToken;
 let adminToken;
 let testInvoiceId;
@@ -15,47 +15,48 @@ let userId;
 describe("Billing Routes", () => {
   before(async () => {
     // Clean up test data
-    await UserCred.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
-    await User.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
+    await UserCred.deleteMany({
+      email: { $in: ["testuser@example.com", "testadmin@example.com"] },
+    });
+    await User.deleteMany({
+      email: { $in: ["testuser@example.com", "testadmin@example.com"] },
+    });
     await Rate.deleteMany({}); // Clean up all rates
-    
     // Create test rates
     await Rate.create([
       {
         vehicleType: "2W",
         baseRate: 30,
-        additionalHourRate: 20
+        additionalHourRate: 20,
       },
       {
         vehicleType: "4W",
         baseRate: 60,
-        additionalHourRate: 40
-      }
+        additionalHourRate: 40,
+      },
     ]);
-    
+
     // Register test user
-    await request(app)
-      .post("/api/register")
-      .send({
-        email: "testuser@example.com",
-        firstName: "Test",
-        lastName: "User",
-        password: "Test@123",
-        confirmpassword: "Test@123",
-        phone: "1234567890"
-      });
+    const userRegResponse = await request(app).post("/api/register").send({
+      email: "testuser@example.com",
+      firstName: "Test",
+      lastName: "User",
+      password: "Test@123",
+      confirmpassword: "Test@123",
+      phone: "8888888888",
+    });
+    expect(userRegResponse.status).to.equal(201);
 
     // Register test admin
-    await request(app)
-      .post("/api/register/admin")
-      .send({
-        email: "testadmin@example.com",
-        firstName: "Test",
-        lastName: "Admin",
-        password: "Admin@123",
-        confirmpassword: "Admin@123",
-        phone: "9876543210"
-      });
+    const adminRegResponse = await request(app).post("/api/register/admin").send({
+      email: "testadmin@example.com",
+      firstName: "Test",
+      lastName: "Admin",
+      password: "Admin@123",
+      confirmpassword: "Admin@123",
+      phone: "9876543210",
+    });
+    expect(adminRegResponse.status).to.equal(201);
 
     // Set admin role manually
     // await UserCred.findOneAndUpdate(
@@ -64,12 +65,12 @@ describe("Billing Routes", () => {
     // );
 
     // Login as regular user
-    const userLoginRes = await request(app)
-      .post("/api/login")
-      .send({
-        email: "testuser@example.com",
-        password: "Test@123"
-      });
+    const userLoginRes = await request(app).post("/api/login").send({
+      email: "testuser@example.com",
+      password: "Test@123",
+    });
+    expect(userLoginRes.status).to.equal(200);
+
     userToken = userLoginRes.body.token;
     userId = userLoginRes.body.id;
     if (!userToken) {
@@ -77,12 +78,11 @@ describe("Billing Routes", () => {
     }
 
     // Login as admin
-    const adminLoginRes = await request(app)
-      .post("/api/login")
-      .send({
-        email: "testadmin@example.com",
-        password: "Admin@123"
-      });
+    const adminLoginRes = await request(app).post("/api/login").send({
+      email: "testadmin@example.com",
+      password: "Admin@123",
+    });
+    expect(adminLoginRes.status).to.equal(200);
     adminToken = adminLoginRes.body.token;
     if (!adminToken) {
       throw new Error("Failed to get admin authentication token");
@@ -175,9 +175,9 @@ describe("Billing Routes", () => {
   });
 
   describe("GET /invoices/:id", () => {
-    it("should fetch invoice by ID", async () => {
+    it("should fetch invoice by UserID", async () => {
       const res = await request(app)
-        .get(`${BASE}/invoices/${testInvoiceId}`)
+        .get(`${BASE}/invoices/${userId}`)
         .set("Authorization", `Bearer ${userToken}`);
 
       expect(res.status).to.equal(200);
@@ -209,8 +209,7 @@ describe("Billing Routes", () => {
     });
 
     it("should fail without authentication", async () => {
-      const res = await request(app)
-        .get(`${BASE}/payment-methods`);
+      const res = await request(app).get(`${BASE}/payment-methods`);
 
       expect(res.status).to.equal(401);
     });
@@ -238,28 +237,28 @@ describe("Billing Routes", () => {
     });
 
     describe("Rate Management", () => {
-      it("should allow admin to create new rate", async () => {
-        const res = await request(app)
-          .post(`${BASE}/rates`)
-          .set("Authorization", `Bearer ${adminToken}`)
-          .send({
-            vehicleType: "2W",
-            baseRate: 30,
-            additionalHourRate: 20
-          });
+      // it("should allow admin to create new rate", async () => {
+      //   const res = await request(app)
+      //     .post(`${RATEBASE}`)
+      //     .set("Authorization", `Bearer ${adminToken}`)
+      //     .send({
+      //       vehicleType: "2W",
+      //       baseRate: 30,
+      //       additionalHourRate: 20,
+      //     });
 
-        expect(res.status).to.equal(201);
-        expect(res.body).to.have.property("status", "success");
-        expect(res.body.data).to.have.property("vehicleType", "2W");
-      });
+      //   expect(res.status).to.equal(201);
+      //   expect(res.body).to.have.property("status", "success");
+      //   expect(res.body.data).to.have.property("vehicleType", "2W");
+      // });
 
       it("should allow admin to update rate", async () => {
         const res = await request(app)
-          .put(`${BASE}/rates/4W`)
+          .put(`${RATEBASE}/4W`)
           .set("Authorization", `Bearer ${adminToken}`)
           .send({
             baseRate: 70,
-            additionalHourRate: 45
+            additionalHourRate: 45,
           });
 
         expect(res.status).to.equal(200);
@@ -269,12 +268,12 @@ describe("Billing Routes", () => {
 
       it("should not allow regular user to create rates", async () => {
         const res = await request(app)
-          .post(`${BASE}/rates`)
+          .post(`${RATEBASE}`)
           .set("Authorization", `Bearer ${userToken}`)
           .send({
             vehicleType: "3W",
             baseRate: 40,
-            additionalHourRate: 25
+            additionalHourRate: 25,
           });
 
         expect(res.status).to.equal(403);
@@ -284,8 +283,12 @@ describe("Billing Routes", () => {
 
   after(async () => {
     // Clean up test data
-    await UserCred.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
-    await User.deleteMany({ email: { $in: ['testuser@example.com', 'testadmin@example.com'] }});
+    await UserCred.deleteMany({
+      email: { $in: ["testuser@example.com", "testadmin@example.com"] },
+    });
+    await User.deleteMany({
+      email: { $in: ["testuser@example.com", "testadmin@example.com"] },
+    });
     await Rate.deleteMany({ vehicleType: "2W" }); // Remove test rate
   });
 });

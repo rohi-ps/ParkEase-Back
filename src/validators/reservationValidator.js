@@ -1,4 +1,5 @@
 const { body } = require('express-validator');
+const Reservation = require('../models/reservationModel');
 
 const isValidVehicleNumber = value => {
   const regex = /^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/;
@@ -24,28 +25,30 @@ const isValidTime = value => {
   return true;
 };
 
-const validateEntryExitLogic = body().custom((value) => {
-  const entry = new Date(`${value.entryDate}T${value.entryTime}`);
-  const exit = new Date(`${value.exitDate}T${value.exitTime}`);
+const validateEntryExitLogic = body().custom(({ req }) => {
 
-  if (exit.getTime() <= entry.getTime()) {
-    if (value.exitDate < value.entryDate) {
-      throw new Error('Exit date must be after entry date');
-    } else if (value.exitDate === value.entryDate && value.exitTime <= value.entryTime) {
-      throw new Error('Exit time must be after entry time on the same day');
-    }
+  // Use provided values or existing values
+  const finalEntryDate = req.body.entryDate 
+    const finalEntryTime = req.body.entryTime 
+  const finalExitDate = req.body.exitDate 
+  const finalExitTime = req.body.exitTime 
+
+  // Create Date objects for comparison
+  const entry = new Date(`${finalEntryDate}T${finalEntryTime}`);
+  const exit = new Date(`${finalExitDate}T${finalExitTime}`);
+
+  if (exit <= entry) {
+    throw new Error('Exit date/time must be after entry date/time');
   }
 
   return true;
 });
 
+
+
 exports.reservationValidators = [
   body('slotId')
     .notEmpty().withMessage('slotId is required'),
-
-  body('vehicleType')
-    .notEmpty().withMessage('vehicleType is required'),
-
   body('vehicleNumber')
     .notEmpty().withMessage('vehicleNumber is required')
     .custom(isValidVehicleNumber),
@@ -69,22 +72,72 @@ exports.reservationValidators = [
   validateEntryExitLogic
 ];
 
+const validateUpdateTiming = async (req, res, next) => {
+  try {
+    const { slotId } = req.params;
+    const existingReservation = await Reservation.findOne({ slotId });
+    
+    if (!existingReservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    // Combine existing and new values
+    const finalData = {
+      entryDate: req.body.entryDate || existingReservation.entryDate,
+      entryTime: req.body.entryTime || existingReservation.entryTime,
+      exitDate: req.body.exitDate || existingReservation.exitDate,
+      exitTime: req.body.exitTime || existingReservation.exitTime
+    };
+
+    // Create Date objects for comparison
+    const entry = new Date(`${finalData.entryDate}T${finalData.entryTime}`);
+    const exit = new Date(`${finalData.exitDate}T${finalData.exitTime}`);
+    const now = new Date();
+
+    // Check if entry date is in the past
+    if (entry < now) {
+      return res.status(400).json({ 
+        message: "Cannot update to a past date/time"
+      });
+    }
+
+    // Check if exit is after entry
+    if (exit <= entry) {
+      return res.status(400).json({ 
+        message: "Exit date/time must be after entry date/time"
+      });
+    }
+
+    // Add a reasonable maximum duration (e.g., 30 days)
+    const maxDuration = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    if (exit - entry > maxDuration) {
+      return res.status(400).json({
+        message: "Reservation duration cannot exceed 30 days"
+      });
+    }
+
+    // Attach the validated data to the request
+    req.validatedData = finalData;
+    next();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 exports.updateReservationValidators = [
   body('entryDate')
     .optional()
     .custom(isValidDate),
-
   body('entryTime')
     .optional()
     .custom(isValidTime),
-
   body('exitDate')
     .optional()
     .custom(isValidDate),
-
   body('exitTime')
     .optional()
     .custom(isValidTime),
-
-  validateEntryExitLogic
+  //  validateEntryExitLogic,
+  validateUpdateTiming
+ 
 ];
