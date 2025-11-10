@@ -4,14 +4,25 @@ const User = require('../models/Registeruser');
 
 exports.createReservation = async (req, res) => {
   try {
-    const { slotId, vehicleNumber } = req.body;
-
+    const { slotId: receivedSlotName, // <--- Rename the incoming field
+            vehicleNumber, 
+            vehicleType, 
+            entryDate, 
+            entryTime, 
+            exitDate, 
+            exitTime, 
+            Duration, 
+            Amount, 
+            status } = req.body;
+    // console.log("Creating reservation for slot:", slotId, "and vehicle:", vehicleNumber);
     // Resolve slot by slotName
-    const slot = await ParkingSlot.findById(slotId );
+    const slot = await ParkingSlot.findOne({slotName:receivedSlotName });
+    console.log("Resolved slot:", slot);
     if (!slot) {
       return res.status(404).json({ message: "Slot not found." });
     }
 
+    const slotId = slot._id; // Use the resolved ObjectId
     // Check for existing reservations
     const slotExists = await Reservation.findOne({
       slotId: slot._id,
@@ -127,9 +138,9 @@ exports.deleteReservation = async (req, res) => {
 
 exports.getReservationByUser = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.params.userId
 
-    const reservations = await Reservation.find({ userId }).populate(
+    const reservations = await Reservation.findOne({ userId }).populate(
       {
         path:'slotId',
         model:'ParkingSlot',
@@ -154,7 +165,7 @@ exports.allusers = async (req, res) => {
       {
         path:'slotId',
         model:'ParkingSlot',
-        select:'slotName vehicleType'
+        select:'slotName vehicleType',
       }
     )
 
@@ -163,3 +174,4 @@ exports.allusers = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
