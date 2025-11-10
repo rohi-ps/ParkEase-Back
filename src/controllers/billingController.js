@@ -175,7 +175,7 @@ const processPayment = async (req, res) => {
     // Update invoice with payment details
     invoice.paymentMethod = paymentMethod;
     invoice.status = 'paid';
-    invoice.paymentDate = new Date();
+    invoice.paidAt = new Date();
     const updatedInvoice = await invoice.save();
 
     res.status(200).json({
