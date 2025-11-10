@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-
+const passport = require('../config/passportconfig');
+const { requireRole } = require('../middleware/jwt');
 
 const {
   getAllParkingSpots,
@@ -18,22 +19,47 @@ const {
 } =  require('../middleware/parkingValidationMiddleware');
 
 // Get all parking spots
-router.get('/', getAllParkingSpots);
+router.get('/',
+  passport.authenticate('jwt', { session: false }),
+  getAllParkingSpots
+);
 
 // Get available parking spots
-router.get('/available-slots',getAvailableSlots);
+router.get('/available-slots', 
+  passport.authenticate('jwt', { session: false }),
+  getAvailableSlots
+);
 
 // Add new parking spot
-router.post('/', validateAddParkingSpot, addParkingSpot);
+router.post('/', 
+  passport.authenticate('jwt', { session: false }),
+  requireRole('admin'),
+  validateAddParkingSpot,
+  addParkingSpot
+);
 
 // Get specific parking spot
-router.get('/:id', validateParkingSpotId, getParkingSpotById);
+router.get('/:id',
+  passport.authenticate('jwt', { session: false }),
+  validateParkingSpotId, 
+  getParkingSpotById
+);
 
 // Update parking spot status
-router.put('/:id/status', validateParkingSpotId, updateParkingSpotStatus);
+router.put('/:id', 
+  passport.authenticate('jwt', { session: false }),
+  requireRole('admin'),
+  validateParkingSpotId, 
+  updateParkingSpotStatus
+);
 
 // remove parking spot
-router.delete('/:id', validateParkingSpotId, deleteParkingSpot);
+router.delete('/:id', 
+  passport.authenticate('jwt', { session: false }),
+  requireRole('admin'),
+  validateParkingSpotId, 
+  deleteParkingSpot
+);
 
 
 module.exports = router;

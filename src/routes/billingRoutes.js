@@ -70,10 +70,9 @@ router.get('/payment-methods',
   getPaymentMethods
 );
 
-// Rate management routes (admin only)
+// Rate management routes
 router.get('/rates',
   passport.authenticate('jwt', { session: false }),
-  requireRole('admin'),
   getRates
 );
 

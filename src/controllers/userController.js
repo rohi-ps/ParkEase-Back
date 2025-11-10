@@ -8,35 +8,39 @@ exports.register = async (req, res) => {
   const name = `${firstName} ${lastName}`;
   console.log("Incoming payload:", req.body);
 
-  const existingUser = await UserCred.findOne({ email:email.toLowerCase() });
+  const existingUser = await UserCred.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    return res.status(409).json({ message: "User already exists" });
+    return res.status(409).json({ success: false, message: "User already exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const login = new UserCred({ email:email.toLowerCase(), role: 'user', password: hashedPassword });
-  const registeredUser = new User({ name, email:email.toLowerCase(), phone, invoices: [] });
+  const login = new UserCred({email: email.toLowerCase(),role: "user",password: hashedPassword});
+  const registeredUser = new User({name,email: email.toLowerCase(),phone,invoices: [],});
   await login.save();
   await registeredUser.save();
-  res.status(201).json({ message: 'User registered successfully' });
+  res.status(201).json({ message: "User registered successfully" });
 };
 
 exports.registerAdmin = async (req, res) => {
   const { email, firstName, lastName, password, phone } = req.body;
   const name = `${firstName} ${lastName}`;
-  console.log('Incoming payload:', req.body);
+  console.log("Incoming payload:", req.body);
 
   const existingUser = await UserCred.findOne({ email });
   if (existingUser) {
-    return res.status(409).json({ message: 'Admin already exists' });
+    return res.status(409).json({ message: "Admin already exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const login = new UserCred({ email, role: 'admin', password: hashedPassword });
+  const login = new UserCred({
+    email,
+    role: "admin",
+    password: hashedPassword,
+  });
   const registeredUser = new User({ name, email, phone, invoices: [] });
   login.save();
   registeredUser.save();
-  res.status(201).json({ message: 'Admin registered successfully' });
+  res.status(201).json({ message: "Admin registered successfully" });
 };
 
 exports.login = async (req, res) => {
@@ -44,8 +48,9 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const credUser = await UserCred.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
 
-    if (!credUser) {
+    if (!credUser || !user) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -61,41 +66,39 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { email: credUser.email, role: credUser.role },
-      process.env.JWT_SECRET,{ expiresIn: '15m' }
+      { email: user.email, role: credUser.role, id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
     );
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-    res
-      .status(200)
-      .json({
-        message: "Login successful",
-        token,
+    // console.log("JWT_SECRET:", process.env.JWT_SECRET);
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      email: user.email,
         role: credUser.role,
-        email: credUser.email,
-        id: credUser._id,
-      });
+        id: user._id,
+    });
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 exports.logout = (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization?.split(" ")[1];
   if (token) addToken(token);
-  res.json({ message: 'Logout successful' });
+  res.json({ message: "Logout successful" });
 };
 
 exports.searchUsersById = async (req, res, next) => {
-    const phone = req.query.phone;
-    if (!phone || phone.length < 3) {
-      return res.status(200).json([]);
-    }
-    try {
-      const users = await User.find({ phone });
-      res.status(200).json(users);
-    } catch (err) {
-      console.error("Fetch user error:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  
+  const phone = req.query.phone;
+  if (!phone || phone.length < 3) {
+    return res.status(200).json([]);
+  }
+  try {
+    const users = await User.find({ phone });
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("Fetch user error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

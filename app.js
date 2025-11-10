@@ -1,4 +1,3 @@
-// const csrfmiddleware=require('./src/middleware/csrfmiddleware')
 require('dotenv').config();
 const errorHandler = require('./src/middleware/errorHandler');
 const express = require('express');
@@ -34,11 +33,11 @@ const reservationRoutes = require('./src/routes/reservationRoutes');
 const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 
 // Routes
-app.use('/api', routes);
-app.use('/api/parking-spots', parkingRoutes);
-app.use('/api/billing', billingRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api/logs', vehicleLogRoutes);
+app.use('/api', routes);//User Module
+app.use('/api/parking-spots', parkingRoutes);//Parking slot Module
+app.use('/api/billing', billingRoutes);//Billing Module
+app.use('/api/reservations', reservationRoutes);//Reservation Module
+app.use('/api/logs', vehicleLogRoutes);//Vehicle Log Module
 // Error handling
 app.use((req, res, next) => {
   const error = new Error('Not Found');

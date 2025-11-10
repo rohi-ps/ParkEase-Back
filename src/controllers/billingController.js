@@ -47,7 +47,7 @@ const getInvoiceById = async (req, res) => {
       });
     }
 
-    const invoice = await Invoice.findById(req.params.id)
+    const invoice = await Invoice.findOne({ userId: req.params.id })
       .populate({
         path: 'userId',
         model: 'user',
