@@ -29,6 +29,7 @@ app.get('/health', (req, res) => {
 const routes = require('./src/routes/userRoutes'); 
 const parkingRoutes = require('./src/routes/parkingRoutes');
 const billingRoutes = require('./src/routes/billingRoutes');
+const rateRoutes = require('./src/routes/rateRoutes');
 const reservationRoutes = require('./src/routes/reservationRoutes');
 const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 
@@ -36,6 +37,7 @@ const vehicleLogRoutes=require('./src/routes/vehicleLogRoutes');
 app.use('/api', routes);//User Module
 app.use('/api/parking-spots', parkingRoutes);//Parking slot Module
 app.use('/api/billing', billingRoutes);//Billing Module
+app.use('/api/rates', rateRoutes);//Rate Module
 app.use('/api/reservations', reservationRoutes);//Reservation Module
 app.use('/api/logs', vehicleLogRoutes);//Vehicle Log Module
 // Error handling

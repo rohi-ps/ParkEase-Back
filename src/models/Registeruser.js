@@ -17,6 +17,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     match: /^[6-9]\d{9}$/
   },
+  reservations: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Reservation'
+    }
+  ],
 
   invoices: [
     {

@@ -34,6 +34,5 @@ const PAYMENT_METHODS = [
 
 module.exports = {
   calculateParkingCharges,
-  calculateDuration,
   PAYMENT_METHODS
 };

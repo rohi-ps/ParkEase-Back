@@ -9,16 +9,12 @@ const {
   processPaymentValidators,
   getInvoiceValidators
 } = require('../validators/billing-validations');
-const { createRateValidators, updateRateValidators } = require('../validators/rate-validations');
 const {
   getAllInvoices,
   getInvoiceById,
   generateInvoice,
   processPayment,
-  getPaymentMethods,
-  getRates,
-  createRate,
-  updateRate
+  getPaymentMethods
 } = require('../controllers/billingController');
 
 const validate = (req, res, next) => {
@@ -50,9 +46,9 @@ router.get('/invoices/:id',
 
 // Generate new invoice (authenticated user)
 router.post('/invoices', 
-  // passport.authenticate('jwt', { session: false }),
-  // generateInvoiceValidators,
-  // validate,
+  passport.authenticate('jwt', { session: false }),
+  generateInvoiceValidators,
+  validate,
   generateInvoice
 );
 
@@ -70,28 +66,5 @@ router.get('/payment-methods',
   getPaymentMethods
 );
 
-// Rate management routes
-router.get('/rates',
-  passport.authenticate('jwt', { session: false }),
-  getRates
-);
-
-//Create rates
-router.post('/rates',
-  passport.authenticate('jwt', { session: false }),
-  requireRole('admin'),
-  createRateValidators,
-  validate,
-  createRate
-);
-
-// Update rates
-router.put('/rates/:vehicleType',
-  passport.authenticate('jwt', { session: false }),
-  requireRole('admin'),
-  updateRateValidators,
-  validate,
-  updateRate
-);
 
 module.exports = router;
