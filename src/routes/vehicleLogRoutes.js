@@ -21,10 +21,13 @@ const router = express.Router();
 router
   .route("/")
   .get(
-    
+    passport.authenticate('jwt', { session: false }),
+    requireRole("admin"),
     getAllLogs
   )
   .post(
+    passport.authenticate('jwt', { session: false }),
+    requireRole("admin"),
     createLog
   );
 
@@ -33,7 +36,8 @@ router
 router
   .route("/my-logs")
   .get(
-   
+    passport.authenticate('jwt', { session: false }),
+    requireRole("user"),
     getMyVehicleLogs
   );
 
@@ -42,7 +46,8 @@ router
 router
   .route("/exit")
   .patch(
-    
+    passport.authenticate('jwt', { session: false }),
+    requireRole("admin"),
     exitVehicleByNumber
   );
 
