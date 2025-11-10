@@ -20,7 +20,6 @@ const validate = (req, res, next) => {
 // Rate management routes
 router.get('/rates',
   passport.authenticate('jwt', { session: false }),
-  
   getRates
 );
 
