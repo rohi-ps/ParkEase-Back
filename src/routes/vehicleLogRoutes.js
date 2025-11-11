@@ -28,6 +28,7 @@ router
   .post(
     passport.authenticate('jwt', { session: false }),
     requireRole("admin"),
+    validateCreateLogRequest,
     createLog
   );
 
