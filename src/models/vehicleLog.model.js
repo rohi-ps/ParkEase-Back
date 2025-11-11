@@ -38,7 +38,7 @@ const vehicleLogSchema = new Schema(
     },
    
     userId: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.Mixed,
       ref: 'User', 
       default: null,
       index: true

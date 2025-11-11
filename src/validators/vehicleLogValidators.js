@@ -1,10 +1,10 @@
 
 function validateCreateLogData(data) {
     const errors = [];
-    const { vehicleNumber, customerName, vehicleType, slotId } = data;
+    const { vehicleNumber, userId, vehicleType, slotId } = data;
 
     if (!vehicleNumber) errors.push('Vehicle number is required.');
-    if (!customerName) errors.push('Customer name is required.');
+    if (!userId) errors.push('UserId is required.');
     if (!vehicleType) errors.push('Vehicle type is required.');
     if (!slotId) errors.push('Slot ID is required.');
 

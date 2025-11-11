@@ -1,139 +1,242 @@
-// Import testing libraries
 const request = require('supertest');
 const chai = require('chai');
 const expect = chai.expect;
 const proxyquire = require('proxyquire'); // For reliable mocking
-
-// Import Node.js core modules
-const fs = require('fs').promises;
-const path = require('path');
+const sinon = require('sinon'); // Used to create stubs for model methods
 
 // --- Mocking Setup ---
-// Define simple mock functions for auth middleware
-let mockUserRole = 'admin'; // Global variable to control mock role
 
-const mockVerifyToken = (req, res, next) => {
-    req.user = mockUserRole === 'none' ? undefined : { email: `test@${mockUserRole}.com`, role: mockUserRole };
-    next();
+// This object will store our mock user for each test
+const mockUser = {
+    id: 'mockUserId123',
+    role: 'admin',
+    vehicleNumbers: ["MH12AB1234"]
 };
 
-const mockRequireRole = (role) => (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({ message: 'Mock Auth Required' });
+// 1. Mock the Passport.js middleware
+const mockPassport = {
+    authenticate: (strategy, options) => (req, res, next) => {
+        if (mockUser.role !== 'none') req.user = mockUser;
+        next();
     }
-    if (req.user.role !== role) {
-        return res.status(403).json({ message: `Mock Access Denied: Requires ${role}` });
-    }
-    next();
 };
 
-// --- Use proxyquire to load the app WITH the mocks injected ---
-const appPath = '../app';
-const jwtMiddlewareRequirePath = './src/middleware/jwt.js'; 
+// 2. Mock the custom requireRole middleware
+const { requireRole } = require('../src/middleware/jwt.js'); // Use the REAL role logic
 
-const app = proxyquire(appPath, {
-    // The key MUST match how app.js/routes require the middleware
-    [jwtMiddlewareRequirePath]: {
-        verifyToken: mockVerifyToken,
-        requireRole: mockRequireRole,
-        '@global': true // Helps ensure mock is used
+// 3. Mock the validation middleware (simple pass-through)
+const mockValidation = {
+    validateCreateLogRequest: (req, res, next) => {
+        const { vehicleNumber, userId, vehicleType, slotId } = req.body;
+        if (!vehicleNumber || !userId || !vehicleType || !slotId) {
+            return res.status(400).json({ message: "Mock Validation: Missing required fields." });
+        }
+        next();
+    },
+    validateExitVehicleRequest: (req, res, next) => {
+        if (!req.body.vehicleNumber) {
+            return res.status(400).json({ message: "Mock Validation: vehicleNumber is required." });
+        }
+        next();
+    },
+    validateIdParameter: (req, res, next) => {
+        if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) { // Simple ObjectId check
+             return res.status(400).json({ message: "Mock Validation: Invalid ID format." });
+        }
+        next();
     }
+};
+
+// 4. --- Mongoose Model Mocks ---
+// We create stubs that we can control in each test
+const vehicleLogStub = {
+    find: sinon.stub(),
+    findOne: sinon.stub(),
+    findById: sinon.stub(),
+    create: sinon.stub(),
+    save: sinon.stub()
+};
+const parkingSlotStub = {
+    findOne: sinon.stub(),
+    findByIdAndUpdate: sinon.stub(),
+    save: sinon.stub()
+};
+const userStub = {
+    findById: sinon.stub()
+};
+
+// The 'save' stub needs to be on the *instance*, so we mock the main model constructor
+const VehicleLogMock = function(data) { return { ...data, save: vehicleLogStub.save }; };
+VehicleLogMock.find = vehicleLogStub.find;
+VehicleLogMock.findOne = vehicleLogStub.findOne;
+VehicleLogMock.findById = vehicleLogStub.findById;
+VehicleLogMock.create = vehicleLogStub.create;
+
+const ParkingSlotMock = function(data) { return { ...data, save: parkingSlotStub.save }; };
+ParkingSlotMock.findOne = parkingSlotStub.findOne;
+ParkingSlotMock.findByIdAndUpdate = parkingSlotStub.findByIdAndUpdate;
+
+const UserMock = {
+    findById: userStub.findById
+};
+
+// 5. Use proxyquire to load the app WITH ALL mocks
+// !!! ADJUST ALL PATHS TO MATCH YOUR PROJECT !!!
+const app = proxyquire('../app', {
+    // Middleware Mocks:
+    '../config/passportconfig': mockPassport,
+    '../middleware/jwt.js': { requireRole: requireRole },
+    '../middleware/vehiclelogValidationMiddleware.js': mockValidation,
+    
+    // Model Mocks:
+    '../models/vehicleLog.model': VehicleLogMock,
+    '../models/parkingModel': ParkingSlotMock,
+    '../models/Registeruser': UserMock
 });
 
-// --- Test Data Setup ---
-// Adjust path from this test file TO your actual data file
-const dataPath = path.join(__dirname, '../src/data/parkingData.json');
-const initialTestData = [
-    { id: 1, vehicleNumber: "MH12AB1234", customerName: "Test User 1", vehicleType: "4W", slotId: "A-01", entryTime: new Date(Date.now() - 3600000).toISOString(), exitTime: null, status: "Parked" },
-    { id: 2, vehicleNumber: "MH14CD5678", customerName: "Test User 2", vehicleType: "2W", slotId: "B-02", entryTime: new Date(Date.now() - 7200000).toISOString(), exitTime: new Date(Date.now() - 1800000).toISOString(), status: "Completed" }
-];
 
 // --- Test Suite ---
-describe('Vehicle Logs API (Simplified Tests)', () => {
+describe('Vehicle Logs API (Mongoose Mocked)', () => {
 
-    // Reset data file and default mock role before each test
-    beforeEach(async () => {
-        mockUserRole = 'admin'; // Default to admin
-        try {
-            await fs.mkdir(path.dirname(dataPath), { recursive: true });
-            await fs.writeFile(dataPath, JSON.stringify(initialTestData, null, 2), 'utf8');
-        } catch (err) {
-            console.error("Setup Error: Could not write test data file.", err);
-            // Consider throwing the error to stop tests if setup fails
-            // throw err;
-        }
+    // Reset stubs and mock user before each test
+    beforeEach(() => {
+        mockUser.role = 'admin';
+        mockUser.id = 'mockAdminId';
+
+        vehicleLogStub.find.reset();
+        vehicleLogStub.findOne.reset();
+        vehicleLogStub.findById.reset();
+        vehicleLogStub.create.reset();
+        vehicleLogStub.save.reset();
+        
+        parkingSlotStub.findOne.reset();
+        parkingSlotStub.findByIdAndUpdate.reset();
+        parkingSlotStub.save.reset();
+        
+        userStub.findById.reset();
     });
 
     // Test Case 1: POST /api/logs - Success (Admin)
     it('1. [Admin] POST /api/logs - should create a new log entry', async () => {
-        const newLogData = { vehicleNumber: "KA01EF9999", customerName: "New Tester", vehicleType: "4W", slotId: "C-03" };
+        const newLogData = {
+            vehicleNumber: "KA01EF9999",
+            userId: "New Tester",
+            vehicleType: "4W",
+            slotId: "A01", // This is the slotName
+            userId: "cust123"
+        };
+        const mockSlot = { _id: "slotObjectId", slotName: "A01", vehicleType: "4W", status: "available", save: parkingSlotStub.save };
+        const createdLog = { ...newLogData, _id: "newLogId", slotId: "slotObjectId", status: "Parked" };
+
+        // Setup mocks:
+        vehicleLogStub.findOne.resolves(null); // No existing parked vehicle
+        parkingSlotStub.findOne.withArgs({ slotName: "A01" }).resolves(mockSlot); // Find the slot by name
+        vehicleLogStub.create.resolves(createdLog); // Return the created log
+        
         const res = await request(app)
-            .post('/api/logs') // Assuming base path is /api/logs
+            .post('/api/logs')
             .send(newLogData);
+            
         expect(res.status).to.equal(201);
-        expect(res.body).to.be.an('object');
-        expect(res.body).to.have.property('id');
         expect(res.body).to.have.property('status', 'Parked');
+        expect(res.body.vehicleNumber).to.equal(newLogData.vehicleNumber);
+        expect(parkingSlotStub.save.called).to.be.true; // Check that slot.save() was called
     });
 
-    // Test Case 2: POST /api/logs - Fail: Missing Field (Admin)
-    it('2. [Admin] POST /api/logs - should fail with missing fields', async () => {
-        const incompleteData = { vehicleNumber: "KA01EF9999", customerName: "New Tester" }; // Missing type and slot
+    // Test Case 2: POST /api/logs - Fail: Validation
+    it('2. [Admin] POST /api/logs - should fail validation for missing vehicleNumber', async () => {
+        const invalidLogData = { userId: "New Tester", vehicleType: "4W", slotId: "A01" };
+        
         const res = await request(app)
             .post('/api/logs')
-            .send(incompleteData);
-        expect(res.status).to.equal(400); // Expect validation failure
-        expect(res.body).to.have.property('message'); // Should have an error message
+            .send(invalidLogData);
+            
+        expect(res.status).to.equal(400);
+        expect(res.body.message).to.equal("Mock Validation: vehicleNumber is required.");
     });
-
-    // Test Case 3: POST /api/logs - Fail: User Role (User trying Admin action)
+    
+    // Test Case 3: POST /api/logs - Fail: User Role
     it('3. [User] POST /api/logs - should return 403 Forbidden', async () => {
-        mockUserRole = 'user'; // Set role to user for this test
-        const newLogData = { vehicleNumber: "KA01EF9999", customerName: "New Tester", vehicleType: "4W", slotId: "C-03" };
+        mockUser.role = 'user'; // Set role to user
+        const newLogData = { vehicleNumber: "KA01EF9999", userId: "New Tester", vehicleType: "4W", slotId: "A01" };
+        
         const res = await request(app)
             .post('/api/logs')
             .send(newLogData);
+            
         expect(res.status).to.equal(403);
-        expect(res.body.message).to.equal('Mock Access Denied: Requires admin');
+        expect(res.body.message).to.equal('Access denied: insufficient permissions');
     });
 
     // Test Case 4: GET /api/logs - Success (Admin)
     it('4. [Admin] GET /api/logs - should return all log entries', async () => {
-        mockUserRole = 'admin'; // Ensure role is admin
+        const mockLogs = [{ id: 1, vehicleNumber: "MH12AB1234" }, { id: 2, vehicleNumber: "MH14CD5678" }];
+        // Mock the chain: find().populate().sort()
+        vehicleLogStub.find.returns({
+            populate: sinon.stub().returnsThis(), // .populate() returns 'this' (the chain)
+            sort: sinon.stub().resolves(mockLogs) // .sort() resolves with our data
+        });
+
         const res = await request(app).get('/api/logs');
+        
         expect(res.status).to.equal(200);
         expect(res.body).to.be.an('array');
-        expect(res.body).to.have.lengthOf(initialTestData.length);
+        expect(res.body).to.have.lengthOf(2);
+        expect(res.body[0].vehicleNumber).to.equal("MH12AB1234");
     });
 
-    // Test Case 5: GET /api/logs/:id - Success (Any Authenticated User)
-    it('5. [User/Admin] GET /api/logs/:id - should return a single log by ID', async () => {
-        mockUserRole = 'user'; // Test that a user can access this
-        const res = await request(app).get('/api/logs/1'); // Get existing ID 1
+    // Test Case 5: GET /my-logs - Success (User)
+    it('5. [User] GET /my-logs - should get their own logs', async () => {
+        mockUser.role = 'user';
+        mockUser.id = 'cust123';
+        
+        const mockDbUser = { _id: "cust123", name: "Mock User", vehicleNumbers: ["MH12AB1234"] };
+        const mockUserLogs = [{ id: 1, vehicleNumber: "MH12AB1234", status: "Parked" }];
+
+        userStub.findById.withArgs("cust123").resolves(mockDbUser);
+        vehicleLogStub.find.returns({ // Mock the find().populate().sort() chain
+            populate: sinon.stub().returnsThis(),
+            sort: sinon.stub().resolves(mockUserLogs)
+        });
+
+        const res = await request(app).get('/api/logs/my-logs');
+        
         expect(res.status).to.equal(200);
-        expect(res.body).to.be.an('object');
-        expect(res.body).to.have.property('id', 1);
+        expect(res.body).to.be.an('array');
+        expect(res.body[0].vehicleNumber).to.equal("MH12AB1234");
     });
 
-    // Test Case 6: GET /api/logs/:id - Fail: Not Found
-    it('6. [User/Admin] GET /api/logs/:id - should return 404 for non-existent ID', async () => {
-        mockUserRole = 'admin'; // Role doesn't matter for 404
-        const res = await request(app).get('/api/logs/999'); // Non-existent ID
-        expect(res.status).to.equal(404);
-        expect(res.body.message).to.equal('Parking log not found.');
+    // Test Case 6: GET /my-logs - Fail: Admin Role
+    it('6. [Admin] GET /my-logs - should fail for admin role', async () => {
+        mockUser.role = 'admin'; // Admins use /api/logs, not /my-logs
+        
+        const res = await request(app).get('/api/logs/my-logs');
+            
+        expect(res.status).to.equal(403);
+        expect(res.body.message).to.equal('Access denied: insufficient permissions');
     });
 
-    // Test Case 7: PATCH /api/logs/:id/exit - Success (Admin)
-    it('7. [Admin] PATCH /api/logs/:id/exit - should mark a vehicle as exited', async () => {
-        mockUserRole = 'admin';
-        const res = await request(app).patch('/api/logs/1/exit'); // Exit the first vehicle ('Parked')
+    // Test Case 7: PATCH /exit-by-vehicle - Success (Admin)
+    it('7. [Admin] PATCH /exit-by-vehicle - should mark a vehicle as exited', async () => {
+        const exitData = { vehicleNumber: "MH12AB1234" };
+        const mockLogToExit = { 
+            _id: "log123", 
+            vehicleNumber: "MH12AB1234", 
+            status: "Parked", 
+            slotId: "slotObjectId",
+            save: vehicleLogStub.save // Attach the save stub
+        };
+        const exitedLog = { ...mockLogToExit, status: "Completed" };
+
+        vehicleLogStub.findOne.withArgs({ vehicleNumber: "MH12AB1234", status: "Parked" }).resolves(mockLogToExit);
+        vehicleLogStub.save.resolves(exitedLog); // Mock the save() call
+        parkingSlotStub.findByIdAndUpdate.resolves(true); // Mock the slot update
+
+        const res = await request(app)
+            .patch('/api/logs/exit-by-vehicle') // 
+            .send(exitData);
+        
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property('status', 'Completed');
-        expect(res.body.exitTime).to.not.be.null;
-
-        // Verify file was updated
-        const data = JSON.parse(await fs.readFile(dataPath, 'utf8'));
-        expect(data[0].status).to.equal('Completed');
     });
-
 });
