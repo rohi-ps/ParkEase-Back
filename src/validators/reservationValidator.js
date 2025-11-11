@@ -25,7 +25,7 @@ const isValidTime = value => {
   return true;
 };
 
-const validateEntryExitLogic = body().custom(({ req }) => {
+const validateEntryExitLogic = body().custom((value,{ req }) => {
 
   // Use provided values or existing values
   const finalEntryDate = req.body.entryDate 
