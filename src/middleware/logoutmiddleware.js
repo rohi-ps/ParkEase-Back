@@ -1,13 +1,15 @@
-const { isBlacklisted } = require('../utils/tokenBlackList');
+const BlacklistedToken = require('../models/logout model');  
 
-const checkBlacklist = (req, res, next) => {
+const checkBlacklist = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Missing token' });
   }
 
   const token = authHeader.split(' ')[1];
-  if (isBlacklisted(token)) {
+  const isBlacklisted = await BlacklistedToken.exists({ token });
+
+  if (isBlacklisted) {
     return res.status(403).json({ message: 'Token is blacklisted' });
   }
 

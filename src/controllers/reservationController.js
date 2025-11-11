@@ -5,14 +5,14 @@ const User = require('../models/Registeruser');
 exports.createReservation = async (req, res) => {
   try {
     const { slotId: receivedSlotName, // <--- Rename the incoming field
-            vehicleNumber,
-            vehicleType,
-            entryDate,
-            entryTime,
-            exitDate,
-            exitTime,
-            Duration,
-            Amount,
+            vehicleNumber, 
+            vehicleType, 
+            entryDate, 
+            entryTime, 
+            exitDate, 
+            exitTime, 
+            Duration, 
+            Amount, 
             status } = req.body;
     // console.log("Creating reservation for slot:", slotId, "and vehicle:", vehicleNumber);
     // Resolve slot by slotName
@@ -21,7 +21,7 @@ exports.createReservation = async (req, res) => {
     if (!slot) {
       return res.status(404).json({ message: "Slot not found." });
     }
- 
+
     const slotId = slot._id; // Use the resolved ObjectId
     // Check for existing reservations
     const slotExists = await Reservation.findOne({
@@ -139,7 +139,7 @@ exports.deleteReservation = async (req, res) => {
 exports.getReservationByUser = async (req, res) => {
   try {
     const userId = req.params.userId
- 
+
     const reservations = await Reservation.findOne({ userId }).populate(
       {
         path:'slotId',
@@ -174,6 +174,4 @@ exports.allusers = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
- 
- 
- 
+

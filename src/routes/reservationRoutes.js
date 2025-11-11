@@ -8,23 +8,27 @@ const { createReservation, updateReservation, deleteReservation, allusers, getRe
 const { reservationValidators, updateReservationValidators } = require('../validators/reservationValidator');
  
 const { requireRole } = require("../middleware/jwt.js");
- 
-router.post('/create',
+
+router.post('/create', 
   reservationValidators, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     await createReservation(req, res);
   });
- 
-router.put('/update/:slotId',updateReservationValidators, async (req, res) => {
+
+router.put('/update/:slotId', 
+  updateReservationValidators, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     await updateReservation(req, res);
   });
- 
-router.delete('/delete/:slotId',deleteReservation);
- 
-router.get('/user/:userId',getReservationByUser);
-router.get('/getall',allusers);
- 
+
+router.delete('/delete/:slotId', 
+  deleteReservation);
+
+router.get('/user/:userId',
+  getReservationByUser);
+router.get('/getall', 
+  allusers);
+
 module.exports = router;
