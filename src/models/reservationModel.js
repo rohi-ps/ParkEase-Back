@@ -13,8 +13,16 @@ const reservationSchema = new mongoose.Schema({
   // },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
+    ref: "User"
   },
+  vehicleType: {
+        type: String,
+        required: [true, 'Vehicle type is required'],
+        enum: {
+            values: ["2W", "4W"],
+            message: '{VALUE} is not a valid vehicle type. Must be 2W or 4W.'
+        }
+    },
   vehicleNumber: {
     type: String,
     required: [true, "Vehicle Number is required."],
@@ -35,6 +43,14 @@ const reservationSchema = new mongoose.Schema({
   exitTime: {
     type: String,
     required: [true, "Exit time is required."]
+  },
+  Duration: {
+    type: String,
+    // required: [true, "Duration is required."]
+  },
+  Amount: {
+    type: String,
+    // required: [true, "Amount is required."]
   },
   status: {
     type: String,

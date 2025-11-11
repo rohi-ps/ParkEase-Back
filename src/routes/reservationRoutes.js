@@ -23,12 +23,14 @@ router.put('/update/:slotId',
     await updateReservation(req, res);
   });
 
-router.delete('/delete/:slotId', 
-  deleteReservation);
+  router.get('/user/:userId',
+    getReservationByUser);
 
-router.get('/user/:userId',
-  getReservationByUser);
-router.get('/getall', 
-  allusers);
+  router.get('/getall', 
+      allusers);
+      
+  router.delete('/:id', 
+      deleteReservation);
+
 
 module.exports = router;
