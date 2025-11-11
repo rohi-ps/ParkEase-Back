@@ -7,15 +7,26 @@ const { calculateParkingCharges, PAYMENT_METHODS } = require('../utils/billingUt
 // Get all invoices
 const getAllInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find()
-      .sort({ createdAt: -1 }) // Sort by latest first
-      .populate({
-        path: 'userId',
-        model: 'user',
-        select: 'name email'
-      });
-    
-    if (!invoices) {
+    let invoices = await Invoice.find().sort({ createdAt: -1 });
+
+    // Populate only valid ObjectIds
+    invoices = await Promise.all(
+      invoices.map(async (invoice) => {
+        if (mongoose.Types.ObjectId.isValid(invoice.userId)) {
+          await invoice.populate({
+            path: 'userId',
+            model: 'User',
+            select: 'name email'
+          });
+        } else {
+          // Add a virtual field for guest
+          invoice.userId = { name: `${invoice.userId}_Guest`, email: null };
+        }
+        return invoice;
+      })
+    );
+
+    if (!invoices || invoices.length === 0) {
       return res.status(404).json({
         status: 'fail',
         message: 'No invoices found'
@@ -36,7 +47,6 @@ const getAllInvoices = async (req, res) => {
     });
   }
 };
-
 // Get invoice by ID
 const getInvoiceById = async (req, res) => {
   try {
