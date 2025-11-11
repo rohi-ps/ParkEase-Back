@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { addToken } = require("../utils/tokenBlackList");
+const BlacklistedToken = require("../models/logout model");
 const User = require("../models/Registeruser");
 const UserCred = require("../models/userCredentials");
 const bcrypt = require("bcrypt");
@@ -83,10 +83,21 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (token) addToken(token);
-  res.json({ message: "Logout successful" });
+  if (!token) return res.status(400).json({ message: "Token missing" });
+
+  try {
+    await BlacklistedToken.updateOne(
+      { token },
+      { $setOnInsert: { token } },
+      { upsert: true }
+    );
+    res.json({ message: "Logout successful" });
+  } catch (err) {
+    console.error("Logout error:", err.message);
+    res.status(500).json({ message: "Logout failed" });
+  }
 };
 
 exports.searchUsersById = async (req, res, next) => {
