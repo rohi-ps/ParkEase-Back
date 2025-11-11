@@ -6,7 +6,6 @@ const { requireRole } = require('../middleware/jwt');
 
 const {
   getAllParkingSpots,
-  getAvailableSlots,
   addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
@@ -24,11 +23,6 @@ router.get('/',
   getAllParkingSpots
 );
 
-// Get available parking spots
-router.get('/available-slots', 
-  passport.authenticate('jwt', { session: false }),
-  getAvailableSlots
-);
 
 // Add new parking spot
 router.post('/', 
