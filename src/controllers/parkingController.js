@@ -12,15 +12,7 @@ const getAllParkingSpots = async (req, res) => {
     });
 };
 
-const getAvailableSlots=async(req,res)=>{
-  try {
-      const slots =await ParkingSlot.find({status:"available"}).select('_id slotName vehicleType');
-      res.status(200).json(slots);
-  } catch (error) {
-    next(error);
-  }
 
-}
 
 // Add new parking spot
 const addParkingSpot = async (req, res) => {
@@ -95,7 +87,6 @@ const deleteParkingSpot = async (req, res) => {
 
 module.exports = {
   getAllParkingSpots,
-  getAvailableSlots,
   addParkingSpot,
   getParkingSpotById,
   updateParkingSpotStatus,
