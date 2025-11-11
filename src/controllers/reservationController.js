@@ -18,7 +18,6 @@ exports.createReservation = async (req, res) => {
     // console.log("Creating reservation for slot:", slotId, "and vehicle:", vehicleNumber);
     // Resolve slot by slotName
     const slot = await ParkingSlot.findOne({slotName:receivedSlotName });
-    console.log("Resolved slot:", slot);
     if (!slot) {
       return res.status(404).json({ message: "Slot not found." });
     }
@@ -26,7 +25,7 @@ exports.createReservation = async (req, res) => {
     const slotId = slot._id; // Use the resolved ObjectId
     // Check for existing reservations
     const slotExists = await Reservation.findOne({
-      slotId: slot._id,
+      slotId: slotId,
       status: { $in: ["Active", "Upcoming"] }
     });
     if (slotExists) {
@@ -54,9 +53,9 @@ exports.createReservation = async (req, res) => {
       Duration,
       Amount,
     });
- 
-    await newReservation.save();
- 
+    const savedReservation = await newReservation.save();
+    console.log("Saved reservation:", savedReservation);
+
     // Update user reservations
     await User.findByIdAndUpdate(req.userId, {
       $push: { reservations: newReservation._id }
@@ -70,7 +69,7 @@ exports.createReservation = async (req, res) => {
       data: newReservation
     });
   } catch (err) {
-    console.error("Reservation error:", err);
+    console.error("Reservation error:", err.message);
     if (err.code === 11000) {
       return res.status(409).json({ message: "Duplicate reservation detected." });
     }
