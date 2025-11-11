@@ -48,14 +48,14 @@ const getInvoiceById = async (req, res) => {
       });
     }
 
-    const invoice = await Invoice.findOne({ userId: req.params.id })
+    const invoice = await Invoice.find({ userId: req.params.id })
       .populate({
         path: 'userId',
         model: 'user',
         select: 'name email'
       })
-      .lean();  // Convert to plain JavaScript object
 
+      console.log(invoice);
     if (!invoice) {
       return res.status(404).json({
         status: 'fail',
