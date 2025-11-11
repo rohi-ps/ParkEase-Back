@@ -13,7 +13,8 @@ exports.createReservation = async (req, res) => {
             exitTime, 
             Duration, 
             Amount, 
-            status } = req.body;
+            status,
+           } = req.body;
     // console.log("Creating reservation for slot:", slotId, "and vehicle:", vehicleNumber);
     // Resolve slot by slotName
     const slot = await ParkingSlot.findOne({slotName:receivedSlotName });
@@ -44,11 +45,14 @@ exports.createReservation = async (req, res) => {
     const newReservation = new Reservation({
       slotId,
       vehicleNumber,
-      userId: req.userId,
+      vehicleType,
+      userId: req.body.userId,
       entryDate: req.body.entryDate,
       entryTime: req.body.entryTime,
       exitDate: req.body.exitDate,
-      exitTime: req.body.exitTime
+      exitTime: req.body.exitTime,
+      Duration,
+      Amount,
     });
  
     await newReservation.save();
@@ -59,7 +63,7 @@ exports.createReservation = async (req, res) => {
     });
  
     // Update slot status
-    await ParkingSlot.findByIdAndUpdate(slot._id, { status: "occupied" });
+    await ParkingSlot.findOneAndUpdate(slot._id, { status: "occupied" });
  
     res.status(201).json({
       message: "Reservation created successfully.",
@@ -108,29 +112,24 @@ exports.updateReservation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
- 
+
 // Delete reservation
 exports.deleteReservation = async (req, res) => {
   try {
-    const { slotId } = req.params;
- 
+    const { slotId } = req.params.slotId;
+
     const deleted = await Reservation.findOneAndDelete({ slotId });
- 
     if (!deleted) {
       return res.status(404).json({ message: "Reservation not found" });
     }
- 
-    const updatedSlot = await ParkingSlot.findByIdAndUpdate(
-      { slotName: slotId },
+
+    const updatedSlot = await ParkingSlot.findOneAndUpdate(
+      { slotName: slotId },   // or slotId depending on schema
       { $set: { status: "available" } },
-      { new: true }
+      { new: true, runValidators: true }
     );
- 
-    if (!updatedSlot) {
-      console.warn(`Slot ${slotId} not found for status revert`);
-    }
- 
-    res.json({ message: "Reservation deleted successfully" });
+
+    res.json({ message: "Reservation deleted successfully", updatedSlot });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -138,26 +137,21 @@ exports.deleteReservation = async (req, res) => {
  
 exports.getReservationByUser = async (req, res) => {
   try {
-    const userId = req.params.userId
+    const userId = req.params.userId;   
+    const reservations = await Reservation.find({ userId })
+      .populate("slotId", "slotName vehicleType")
 
-    const reservations = await Reservation.findOne({ userId }).populate(
-      {
-        path:'slotId',
-        model:'ParkingSlot',
-        select:'slotName vehicleType'
-      }
-    );
- 
     if (!reservations || reservations.length === 0) {
-      return res.status(404).json({ message: 'No reservations found for this user' });
+      return res.status(404).json({ message: "No reservations found for this user" });
     }
- 
-    res.status(200).json({ data: reservations });
+
+    res.status(200).json(reservations);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
- 
+
+
  
 exports.allusers = async (req, res) => {
   try {

@@ -4,16 +4,19 @@ const reservationSchema = new mongoose.Schema({
   slotId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ParkingSlot",
-    required: [true, "Slot Id is required."]
+    required: [true, "Slot Id is required."],
   },
-  // vehicleType: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "ParkingSlot",
-  //   required: true
-  // },
+  vehicleType: {
+    type: String,
+    required: [true, "Vehicle type is required"],
+    enum: {
+      values: ["2W", "4W"],
+      message: "{VALUE} is not a valid vehicle type. Must be 2W or 4W.",
+    },
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user"
+    ref: "User",
   },
   vehicleNumber: {
     type: String,
@@ -22,25 +25,31 @@ const reservationSchema = new mongoose.Schema({
   },
   entryDate: {
     type: String,
-    required: [true, "Entry date is required."]
+    required: [true, "Entry date is required."],
   },
   entryTime: {
     type: String,
-    required: [true, "Entry time is required."]
+    required: [true, "Entry time is required."],
   },
   exitDate: {
     type: String,
-    required: [true, "Exit date is required."]
+    required: [true, "Exit date is required."],
   },
   exitTime: {
     type: String,
-    required: [true, "Exit time is required."]
+    required: [true, "Exit time is required."],
   },
   status: {
     type: String,
     enum: ["Active", "Completed", "Cancelled", "Upcoming"],
-    default: "Upcoming"
-  }
+    default: "Upcoming",
+  },
+  Duration: {   
+    type: String,
+  },
+  Amount: {
+    type: String,
+  },
 });
 
 reservationSchema.pre("validate", function (next) {
@@ -72,8 +81,8 @@ reservationSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      status: { $in: ["Active", "Upcoming"] }
-    }
+      status: { $in: ["Active", "Upcoming"] },
+    },
   }
 );
 reservationSchema.index({ status: 1 });
