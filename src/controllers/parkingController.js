@@ -55,7 +55,7 @@ const getParkingSpotById = async (req, res) => {
 // Update parking spot status
 const updateParkingSpotStatus = async (req, res) => {
     const spotId = req.params.id;
-    const updatedSpot = await ParkingSlot.findOneAndUpdate({ slotName: spotId },{ status: req.body.status }, { new: true });
+    const updatedSpot = await ParkingSlot.findOneAndUpdate({ slotName: spotId },{$set:{ status: req.body.status }}, { new: true });
     if (!updatedSpot) {
       return res.status(404).json({
         status: 'fail',
