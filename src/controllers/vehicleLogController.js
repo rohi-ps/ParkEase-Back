@@ -19,7 +19,7 @@ const getAllLogs = async (req, res, next) => {
 // --- CREATE NEW LOG (Vehicle Enters) ---
 const createLog = async (req, res, next) => {
     
-    // Note: 'slotId' here is expected to be the slotName, like "A-01"
+    // Note: 'slotId' here is expected to be the slotName, like "A01"
     const { vehicleNumber, vehicleType, slotId, userId } = req.body;
 
     try {

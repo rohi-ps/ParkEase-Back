@@ -1,4 +1,4 @@
-const { validationResult } = require('express-validator'); // <-- CORRECTED: Changed to validationResult
+const { validationResult } = require('express-validator'); 
 const { parkingSpotValidationSchema, parkingslotIdValidationSchema } = require('../validators/parking-validations');
 
 const validateAddParkingSpot = [
