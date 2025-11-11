@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const passport = require("../config/passportconfig");
 const { validationResult } = require('express-validator');
-
+ 
 const { createReservation, updateReservation, deleteReservation, allusers, getReservationByUser } = require('../controllers/reservationController');
-
+ 
 const { reservationValidators, updateReservationValidators } = require('../validators/reservationValidator');
-
+ 
 const { requireRole } = require("../middleware/jwt.js");
 
 router.post('/create', 
