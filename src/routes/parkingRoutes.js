@@ -32,6 +32,8 @@ router.post('/',
   addParkingSpot
 );
 
+
+
 // Get specific parking spot
 router.get('/:id',
   passport.authenticate('jwt', { session: false }),
