@@ -50,6 +50,11 @@ const reservationSchema = new mongoose.Schema({
   Amount: {
     type: String,
   },
+  // invoiceId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Invoice',
+  //   default: null
+  // }
 });
 
 reservationSchema.pre("validate", function (next) {

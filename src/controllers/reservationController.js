@@ -1,6 +1,9 @@
- const Reservation = require('../models/reservationModel');
+const Reservation = require('../models/reservationModel');
 const ParkingSlot = require('../models/parkingModel');
 const User = require('../models/Registeruser');
+const Invoice = require('../models/invoice');
+
+
  
 exports.createReservation = async (req, res) => {
   try {
@@ -46,10 +49,10 @@ exports.createReservation = async (req, res) => {
       vehicleNumber,
       vehicleType,
       userId: req.body.userId,
-      entryDate: req.body.entryDate,
-      entryTime: req.body.entryTime,
-      exitDate: req.body.exitDate,
-      exitTime: req.body.exitTime,
+      entryDate: entryDate,
+      entryTime: entryTime,
+      exitDate: exitDate,
+      exitTime: exitTime,
       Duration,
       Amount,
     });
@@ -80,11 +83,11 @@ exports.createReservation = async (req, res) => {
 // Update reservation
 exports.updateReservation = async (req, res) => {
   try {
-    const { slotId } = req.params;
+    const { id } = req.params;
    
     // First fetch the existing reservation
-    const existingReservation = await Reservation.findOne({ slotId });
-   
+    const existingReservation = await Reservation.findById(id);
+
     if (!existingReservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
@@ -96,13 +99,31 @@ exports.updateReservation = async (req, res) => {
       exitDate: req.body.exitDate || existingReservation.exitDate,
       exitTime: req.body.exitTime || existingReservation.exitTime
     };
- 
-    const updated = await Reservation.findOneAndUpdate(
-      { slotId },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
- 
+    const updated = await Reservation.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true });
+
+    // If reservation has an associated invoice, update its amounts/dates
+    if (updated.invoiceId) {
+      const rate = await require('../models/rate').findOne({ vehicleType: updated.vehicleType });
+      if (rate) {
+        // Recalculate hours and amount if entry/exit changed
+        const checkIn = new Date(`${updated.entryDate}T${updated.entryTime}`);
+        const checkOut = new Date(`${updated.exitDate}T${updated.exitTime}`);
+        const durationHours = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60));
+        const additionalHours = Math.max(0, durationHours - 1);
+        const totalAmount = rate.baseRate + (additionalHours * rate.additionalHourRate);
+
+        await Invoice.findOneAndUpdate({ reservationId: updated._id }, {
+          $set: {
+            checkInTime: checkIn,
+            checkOutTime: checkOut,
+            'totalAmount.hours': durationHours,
+            'totalAmount.baseRate': rate.baseRate,
+            'totalAmount.additionalHourRate': rate.additionalHourRate
+          }
+        });
+      }
+    }
+
     res.json({
       message: "Reservation updated successfully",
       data: updated
@@ -115,20 +136,35 @@ exports.updateReservation = async (req, res) => {
 // Delete reservation
 exports.deleteReservation = async (req, res) => {
   try {
-    const { slotId } = req.params.slotId;
+    const { id } = req.params;
 
-    const deleted = await Reservation.findOneAndDelete({ slotId });
-    if (!deleted) {
+    // 1. Find reservation first to get slotId
+    const reservation = await Reservation.findById(id);
+    if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    const updatedSlot = await ParkingSlot.findOneAndUpdate(
-      { slotName: slotId },   // or slotId depending on schema
+    const slotId = reservation.slotId; // or reservation.parkingSlotId based on your schema
+
+    // 2. Delete the reservation
+    await Reservation.findByIdAndDelete(id);
+
+    // 3. If there is a linked invoice, cancel it
+    // if (reservation.invoiceId) {
+    //   await Invoice.findOneAndUpdate({ reservationId: reservation._id }, { $set: { status: 'cancelled' } });
+    // }
+    await Invoice.findOneAndUpdate({ reservationId: reservation._id }, { $set: { status: 'cancelled' } });
+    // 4. Update the parking slot status
+    const updatedSlot = await ParkingSlot.findByIdAndUpdate(
+      slotId,
       { $set: { status: "available" } },
       { new: true, runValidators: true }
     );
 
-    res.json({ message: "Reservation deleted successfully", updatedSlot });
+    res.json({
+      message: "Reservation deleted successfully",
+      updatedSlot
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
