@@ -16,7 +16,7 @@ const getAllInvoices = async (req, res) => {
         if (mongoose.Types.ObjectId.isValid(invoice.userId)) {
           await invoice.populate({
             path: 'userId',
-            model: 'User',
+            model: 'user',
             select: 'name email'
           });
         } else {
