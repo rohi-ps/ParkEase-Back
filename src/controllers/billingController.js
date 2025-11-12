@@ -3,6 +3,7 @@ const Invoice = require('../models/invoice');
 const Rate = require('../models/rate');
 const User= require('../models/Registeruser');
 const { calculateParkingCharges, PAYMENT_METHODS } = require('../utils/billingUtils');
+const ParkingSpot=require('../models/parkingModel');
 
 // Get all invoices
 const getAllInvoices = async (req, res) => {
@@ -90,7 +91,7 @@ const getInvoiceById = async (req, res) => {
 // Generate new invoice
 const generateInvoice = async (req, res) => {
   try {
-    const { userId, parkingSpotId, vehicleType, checkInTime, checkOutTime } = req.body;
+    const { userId, parkingSpotId, vehicleType, checkInTime, checkOutTime ,reservationId} = req.body;
 
     // Validate vehicle type
     const validVehicleTypes = ['2W', '4W'];
@@ -110,13 +111,30 @@ const generateInvoice = async (req, res) => {
       });
     }
 
+    // ✅ Handle parkingSpotId (ObjectId or slot name)
+    let finalParkingSpotId = parkingSpotId;
+    const slotNameRegex = /^[A-Z]\d{1,2}$/;
+
+    if (slotNameRegex.test(parkingSpotId)) {
+      const spot = await ParkingSpot.findOne({ slotName: parkingSpotId });
+      if (!spot) {
+        return res.status(404).json({
+          status: 'fail',
+          message: `Parking spot with name ${parkingSpotId} not found`
+        });
+      }
+      finalParkingSpotId = spot._id; // Replace with actual ObjectId
+    }
+
     // Calculate charges using billing utils
     const charges = await calculateParkingCharges(vehicleType, checkInTime, checkOutTime);
 
-    // Create new invoice using the Mongoose model
+    
+
+    // Create new invoice
     const newInvoice = new Invoice({
       userId,
-      parkingSpotId,
+      parkingSpotId: finalParkingSpotId,
       vehicleType,
       checkInTime,
       checkOutTime,
@@ -126,14 +144,25 @@ const generateInvoice = async (req, res) => {
         hours: charges.duration
       }
     });
+    if (reservationId) {
+      // console.log(reservationId)
+      // // If reservationId is provided, link it to the invoice
+      // const reservation = await Reservation.findById(reservationId);
+      // if (!reservation) {
+      //   return res.status(404).json({
+      //     status: 'fail',
+      //     message: 'Reservation not found'
+      //   });
+      // }
+      newInvoice.reservationId = reservationId;
+    }
 
-    // Save the invoice
     await newInvoice.save();
-    User.findByIdAndUpdate(userId,{
-      $push:{
-        invoices: newInvoice._id
-      }
-    })// for the one to many relationship
+
+    // Update user invoices (One-to-Many)
+    await User.findByIdAndUpdate(userId, {
+      $push: { invoices: newInvoice._id }
+    });
 
     res.status(201).json({
       status: 'success',

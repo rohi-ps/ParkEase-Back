@@ -16,14 +16,14 @@ router.post('/create',
     await createReservation(req, res);
   });
 
-router.put('/update/:slotId', 
+router.put('/update/:id', 
   updateReservationValidators, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     await updateReservation(req, res);
   });
 
-router.delete('/delete/:slotId', 
+router.delete('/delete/:id', 
   deleteReservation);
 
 router.get('/user/:userId',

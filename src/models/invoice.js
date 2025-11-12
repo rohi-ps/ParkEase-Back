@@ -1,3 +1,4 @@
+const { ref } = require('joi');
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema({
@@ -7,7 +8,8 @@ const invoiceSchema = new mongoose.Schema({
     required: true
   },
   parkingSpotId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ParkingSlot',
     required: true
   },
   vehicleType: {
@@ -29,11 +31,16 @@ const invoiceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'paid', 'cancelled'],
+    enum: ['pending', 'paid', 'cancelled', 'failed'],
     default: 'pending'
   },
   paidAt: {
     type: Date,
+    default: null
+  },
+  reservationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reservation',
     default: null
   },
   totalAmount: {
@@ -60,12 +67,5 @@ invoiceSchema.index({ status: 1 });
 invoiceSchema.index({ parkingSpotId: 1 });
 invoiceSchema.index({ paidAt: 1 });
 
-// Methods for payment processing
-invoiceSchema.methods.processPayment = async function(paymentMethod) {
-  this.paymentMethod = paymentMethod;
-  this.status = 'paid';
-  this.paidAt = new Date();
-  return await this.save();
-};
 
 module.exports = mongoose.model('Invoice', invoiceSchema);
