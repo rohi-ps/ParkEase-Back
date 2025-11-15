@@ -9,7 +9,6 @@ const ParkingSpot=require('../models/parkingModel');
 const getAllInvoices = async (req, res) => {
   try {
     let invoices = await Invoice.find().sort({ createdAt: -1 });
-
     // Populate only valid ObjectIds
     invoices = await Promise.all(
       invoices.map(async (invoice) => {
@@ -111,7 +110,6 @@ const generateInvoice = async (req, res) => {
       });
     }
 
-    // ✅ Handle parkingSpotId (ObjectId or slot name)
     let finalParkingSpotId = parkingSpotId;
     const slotNameRegex = /^[A-Z]\d{1,2}$/;
 
@@ -145,15 +143,6 @@ const generateInvoice = async (req, res) => {
       }
     });
     if (reservationId) {
-      // console.log(reservationId)
-      // // If reservationId is provided, link it to the invoice
-      // const reservation = await Reservation.findById(reservationId);
-      // if (!reservation) {
-      //   return res.status(404).json({
-      //     status: 'fail',
-      //     message: 'Reservation not found'
-      //   });
-      // }
       newInvoice.reservationId = reservationId;
     }
 

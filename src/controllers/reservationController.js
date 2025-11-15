@@ -88,13 +88,12 @@ exports.createReservation = async (req, res) => {
 exports.updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("Updating reservation:", id);
     // First fetch the existing reservation
-    const existingReservation = await Reservation.findById(id);
+    const existingReservation = await Reservation.findById(req.body._id);
 
-    if (!existingReservation) {
-      return res.status(404).json({ message: "Reservation not found" });
-    }
+    // if (!existingReservation) {
+    //   return res.status(404).json({ message: "Reservation not found" });
+    // }
 
     // Merge existing and new data
     const updateData = {
@@ -108,7 +107,7 @@ exports.updateReservation = async (req, res) => {
       vehicleType: req.body.vehicleType || existingReservation.vehicleType, // ✅ Add this
     };
     const updated = await Reservation.findByIdAndUpdate(
-      id,
+      req.body._id,
       { $set: updateData },
       { new: true, runValidators: true }
     );

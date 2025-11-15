@@ -35,7 +35,6 @@ const addParkingSpot = async (req, res) => {
 // Get parking spot by ID
 const getParkingSpotById = async (req, res) => {
     const spotId = req.params.id;
-    // const spot = await parkingSpots.find(spot => spot.slotName === spotId);
     const spot1 = await ParkingSlot.findOne({ slotName: spotId });
     if (!spot1) {
       return res.status(404).json({
